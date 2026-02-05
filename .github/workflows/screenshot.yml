@@ -1,9 +1,9 @@
-name: Screenshot leaderboard
+name: screenshot
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
+  schedule:
+    - cron: "*/10 * * * *"
 
 jobs:
   screenshot:
@@ -18,8 +18,22 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser
 
-      - name: Wait for page render
-        run: sleep 8
+      # 🔥 čekáme dokud stránka neřekne "ready"
+      - name: Wait until page is ready
+        run: |
+          until chromium-browser \
+            --headless \
+            --no-sandbox \
+            --disable-dev-shm-usage \
+            --disable-gpu \
+            --virtual-time-budget=15000 \
+            --dump-dom \
+            https://hdlan-info.github.io/boom-beach-team-8C0299VL/ \
+            | grep 'data-ready="true"'
+          do
+            echo "Waiting for render..."
+            sleep 1
+          done
 
       - name: Take screenshot
         run: |
