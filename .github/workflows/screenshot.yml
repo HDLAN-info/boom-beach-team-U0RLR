@@ -1,11 +1,42 @@
-- name: Take screenshot
-  run: |
-    chromium-browser \
-      --headless \
-      --no-sandbox \
-      --disable-dev-shm-usage \
-      --disable-gpu \
-      --hide-scrollbars \
-      --window-size=2100,10000 \
-      --screenshot=leaderboard.png \
-      https://hdlan-info.github.io/boom-beach-team-8C0299VL/
+name: Screenshot leaderboard
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Chromium
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+
+      - name: Wait for page render
+        run: sleep 8
+
+      - name: Take screenshot
+        run: |
+          chromium-browser \
+            --headless \
+            --no-sandbox \
+            --disable-dev-shm-usage \
+            --disable-gpu \
+            --hide-scrollbars \
+            --window-size=2100,5000 \
+            --screenshot=leaderboard.png \
+            https://hdlan-info.github.io/boom-beach-team-8C0299VL/
+
+      - name: Commit screenshot
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add leaderboard.png
+          git commit -m "Update screenshot" || echo "No changes"
+          git push
