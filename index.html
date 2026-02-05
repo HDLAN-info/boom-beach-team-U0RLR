@@ -1,38 +1,50 @@
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
 
-function parseCSV(text) {
-  const rows = [];
-  let row = [];
-  let cell = "";
-  let insideQuotes = false;
-
-  for (let char of text) {
-    if (char === '"' ) {
-      insideQuotes = !insideQuotes;
-    } else if (char === ',' && !insideQuotes) {
-      row.push(cell);
-      cell = "";
-    } else if (char === '\n' && !insideQuotes) {
-      row.push(cell);
-      rows.push(row);
-      row = [];
-      cell = "";
-    } else {
-      cell += char;
-    }
-  }
-
-  row.push(cell);
-  rows.push(row);
-  return rows;
-}
+const container = document.getElementById("team");
+container.innerHTML = "<p style='color:white'>Načítám data…</p>";
 
 fetch(sheetURL)
-  .then(res => res.text())
+  .then(res => {
+    if (!res.ok) throw new Error("Fetch failed: " + res.status);
+    return res.text();
+  })
   .then(text => {
-    const data = parseCSV(text).slice(1);
-    const container = document.getElementById("team");
+    container.innerHTML = "";
 
-    data.forEach(cols => {
-      const [name, level, role, medals,]()
+    const rows = text.trim().split("\n").slice(1);
+
+    rows.forEach(row => {
+      const cols = row.split(",");
+      if (cols.length < 6) {
+        container.innerHTML += `<p style="color:red">Špatný řádek: ${row}</p>`;
+        return;
+      }
+
+      const [name, level, role, medals, tickets, qr] = cols;
+
+      const div = document.createElement("div");
+      div.className = "member";
+
+      div.innerHTML = `
+        <div class="level">${level}</div>
+        <div>
+          <div class="name">${name}</div>
+          <div class="role">${role}</div>
+        </div>
+        <div class="stats">
+          🥇 ${medals}<br>
+          🎟 ${tickets}
+        </div>
+        <div class="qr">
+          <img src="${qr}">
+        </div>
+      `;
+
+      container.appendChild(div);
+    });
+  })
+  .catch(err => {
+    container.innerHTML = `<p style="color:red">CHYBA: ${err}</p>`;
+  });
+</script>
