@@ -17,23 +17,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser
 
-      - name: Wait until page is ready
-        run: |
-          until chromium-browser \
-            --headless \
-            --disable-gpu \
-            --virtual-time-budget=10000 \
-            --run-all-compositor-stages-before-draw \
-            --screenshot=/dev/null \
-            --window-size=2100,10000 \
-            --virtual-time-budget=10000 \
-            --dump-dom \
-            https://hdlan-info.github.io/boom-beach-team-8C0299VL/ \
-            | grep 'data-ready="true"'
-          do
-            echo "Waiting for render..."
-            sleep 1
-          done
+      - name: Wait for page render
+        run: sleep 8
 
       - name: Take screenshot
         run: |
@@ -42,9 +27,12 @@ jobs:
             --disable-gpu \
             --hide-scrollbars \
             --run-all-compositor-stages-before-draw \
-            --window-size=2100,10000 \
+            --window-size=2100,5000 \
             --screenshot=leaderboard.png \
             https://hdlan-info.github.io/boom-beach-team-8C0299VL/
+
+      - name: Pull latest changes
+        run: git pull --rebase
 
       - name: Commit screenshot
         run: |
