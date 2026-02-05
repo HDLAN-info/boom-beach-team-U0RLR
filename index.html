@@ -23,12 +23,13 @@ html, body {
 
 /* CONTAINER */
 #team {
-  width: 100%;
-  margin: 0;
+  width: 2100px;      /* pevná šířka = žádné zalamování */
+  margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
+
 
 /* KARTA */
 .member {
@@ -166,7 +167,13 @@ html, body {
 </style>
 </head>
 
-<body>
+<body style="
+  background: transparent;
+  margin: 0;
+  padding: 10px;
+  width: 2100px;
+  overflow: hidden;
+">
 
 <div id="team">Načítám…</div>
 
@@ -208,6 +215,7 @@ fetch(url)
     };
   }).filter(Boolean);
 
+  // sort podle medals
   players.sort((a, b) => b.medals - a.medals);
 
   players.forEach(p => {
@@ -256,4 +264,5 @@ function generateQR() {
 </script>
 
 </body>
+
 </html>
