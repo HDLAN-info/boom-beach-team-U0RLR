@@ -234,9 +234,15 @@ setTimeout(() => generateQR(), 50);
 });
 
 function generateQR() {
-  document.querySelectorAll(".qr").forEach(el => {
+  const elements = document.querySelectorAll(".qr");
+  let done = 0;
+
+  elements.forEach(el => {
     const link = el.dataset.link;
-    if (!link) return;
+    if (!link) {
+      done++;
+      return;
+    }
 
     new QRCode(el, {
       text: link,
@@ -246,11 +252,16 @@ function generateQR() {
       colorLight: "#f4e6c8",
       correctLevel: QRCode.CorrectLevel.H
     });
+
+    done++;
   });
 
-  // 👇 TADY říkáme: stránka hotová
-  document.body.setAttribute("data-ready", "true");
+  // počkej, až se DOM fakt dokreslí
+  setTimeout(() => {
+    document.body.setAttribute("data-ready", "true");
+  }, 300);
 }
+
 </script>
 
 </body>
