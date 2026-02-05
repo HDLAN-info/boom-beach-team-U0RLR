@@ -17,6 +17,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser
 
+      # 🔥 nech stránku dýchat
+      - name: Warm up page
+        run: |
+          chromium-browser \
+            --headless \
+            --disable-gpu \
+            --window-size=2100,10000 \
+            https://hdlan-info.github.io/boom-beach-team-8C0299VL/
+          sleep 6
+
       - name: Take screenshot
         run: |
           chromium-browser \
