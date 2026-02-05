@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Boom Beach Team</title>
+
+<style>
+body {
+  background: #0d2b3a;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  color: white;
+}
+
+#team {
+  max-width: 900px;
+  margin: auto;
+}
+
+.member {
+  background: #f2e7c9;
+  color: #333;
+  border-radius: 10px;
+  margin: 8px 0;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 60px 1fr auto auto 80px;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.level {
+  width: 50px;
+  height: 50px;
+  background: #5fa9d6;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: white;
+  font-size: 18px;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.role {
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+.stats {
+  text-align: right;
+  font-size: 14px;
+}
+
+.qr img {
+  width: 60px;
+  height: 60px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="team"></div>
+
+<script>
+// 🔁 ZMĚŇ NA SVŮJ GOOGLE CSV LINK
+const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
+
+
+fetch(sheetURL)
+  .then(res => res.text())
+  .then(data => {
+    const rows = data.trim().split("\n").slice(1);
+    const container = document.getElementById("team");
+
+    rows.forEach(row => {
+      const [name, level, role, medals, tickets, qr] = row.split(",");
+
+      const div = document.createElement("div");
+      div.className = "member";
+
+      div.innerHTML = `
+        <div class="level">${level}</div>
+
+        <div>
+          <div class="name">${name}</div>
+          <div class="role">${role}</div>
+        </div>
+
+        <div class="stats">
+          🥇 ${medals}<br>
+          🎟 ${tickets}
+        </div>
+
+        <div class="qr">
+          <img src="${qr}" alt="QR">
+        </div>
+      `;
+
+      container.appendChild(div);
+    });
+  });
+</script>
+
+</body>
+</html>
