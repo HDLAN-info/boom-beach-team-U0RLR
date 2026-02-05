@@ -13,7 +13,6 @@
   src: url("fonts/broshk.ttf") format("truetype");
 }
 
-/* 🔥 čistý render pro screenshot */
 html, body {
   margin: 0;
   padding: 0;
@@ -22,7 +21,6 @@ html, body {
   font-family: "Trebuchet MS", Arial, sans-serif;
 }
 
-/* CONTAINER */
 #team {
   width: 2100px;
   margin: 0;
@@ -31,25 +29,20 @@ html, body {
   gap: 16px;
 }
 
-/* KARTA */
 .member {
   background: #e6d8b5;
   border-radius: 16px;
   padding: 2px 8px 2px 2px;
-
   display: grid;
   grid-template-columns: 124px 1fr 150px 180px;
   align-items: center;
   gap: 20px;
-
   height: 162px;
-
   box-shadow:
     inset 0 2px 0 #fff5d8,
     inset 0 -2px 0 rgba(0,0,0,0.08);
 }
 
-/* LEVEL */
 .level {
   width: 110px;
   height: 110px;
@@ -58,37 +51,29 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-
   font-family: "Broshk", sans-serif;
   font-size: 70px;
   font-weight: 700;
   color: #fff;
-
   border: 4px solid #2b5f8f;
-
   text-shadow:
     -2px -2px 0 #000,
      2px -2px 0 #000,
     -2px  2px 0 #000,
      2px  2px 0 #000,
      0 4px 0 rgba(0,0,0,0.6);
-
   box-shadow:
     inset 0 6px 0 #a7d5f5,
     0 3px 0 rgba(0,0,0,0.35);
-
   margin-left: 14px;
 }
 
-/* JMÉNO */
 .name {
-  font-family: Arial, sans-serif;
   font-size: 60px;
   font-weight: 600;
   color: #ffffff;
   line-height: 1;
   margin-top: -7px;
-
   text-shadow:
     -2px -2px 0 #000,
      2px -2px 0 #000,
@@ -97,20 +82,16 @@ html, body {
      0 5px 0 rgba(0,0,0,0.6);
 }
 
-/* ROLE */
 .role {
-  font-family: Arial, sans-serif;
   font-size: 40px;
   font-weight: 600;
   color: #2a2a2a;
   margin-top: 6px;
-
   text-shadow:
     0 1px 0 #fff,
     0 2px 0 rgba(0,0,0,0.15);
 }
 
-/* QR */
 .qr, .qr-empty {
   width: 150px;
   height: 150px;
@@ -140,7 +121,6 @@ html, body {
   pointer-events: none;
 }
 
-/* STATS */
 .stats {
   font-size: 40px;
   font-weight: 600;
@@ -174,16 +154,13 @@ const medalIcon = "img/medal.webp";
 const intelIcon = "img/intel.webp";
 
 function clean(v) {
-  v = v.trim();
-  if (v.startsWith('"') && v.endsWith('"')) {
-    v = '"' + v.replace(/^"+|"+$/g, "") + '"';
-  }
-  return v;
+  return v.trim().replace(/^"+|"+$/g, "");
 }
 
 fetch(url)
 .then(r => r.text())
 .then(text => {
+
   const rows = text.trim().split("\n").slice(1);
   const container = document.getElementById("team");
   container.innerHTML = "";
@@ -192,69 +169,75 @@ fetch(url)
     const cols = row.split(",");
     if (cols.length < 6) return null;
 
-    const [nameRaw, levelRaw, roleRaw, medalsRaw, ticketsRaw, qrRaw] = cols;
+    const [name, level, role, medals, tickets, qr] = cols;
 
     return {
-      name: clean(nameRaw),
-      level: clean(levelRaw),
-      role: clean(roleRaw),
-      medals: parseInt(clean(medalsRaw)) || 0,
-      tickets: clean(ticketsRaw),
-      qr: clean(qrRaw)
+      name: clean(name),
+      level: clean(level),
+      role: clean(role),
+      medals: parseInt(clean(medals)) || 0,
+      tickets: clean(tickets),
+      qr: clean(qr)
     };
   }).filter(Boolean);
 
   players.sort((a, b) => b.medals - a.medals);
 
   players.forEach(p => {
-    const { name, level, role, medals, tickets, qr } = p;
-    const hasQR = qr !== "";
+    const hasQR = p.qr !== "";
 
     const div = document.createElement("div");
     div.className = "member";
 
     div.innerHTML = `
-      <div class="level">${level}</div>
+      <div class="level">${p.level}</div>
       <div>
-        <div class="name">${name}</div>
-        <div class="role">${role}</div>
+        <div class="name">${p.name}</div>
+        <div class="role">${p.role}</div>
       </div>
-      ${hasQR ? `<div class="qr" data-link="${qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
+      ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
       <div class="stats">
-        <div><img class="icon" src="${medalIcon}">${medals}</div>
-        <div><img class="icon intel" src="${intelIcon}">${tickets}</div>
+        <div><img class="icon" src="${medalIcon}">${p.medals}</div>
+        <div><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
       </div>
     `;
 
     container.appendChild(div);
   });
 
-setTimeout(() => generateQR(), 50);
+  setTimeout(generateQR, 50);
+
+})
+.catch(err => {
+
+  console.error("FETCH FAILED:", err);
+
+  document.getElementById("team").innerHTML = "Chyba načítání dat";
+  document.body.setAttribute("data-ready", "true");
+
 });
 
 function generateQR() {
-  const elements = document.querySelectorAll(".qr");
 
-  elements.forEach(el => {
-    const link = el.dataset.link;
-    if (!link) return;
-
-    new QRCode(el, {
-      text: link,
-      width: 146,
-      height: 146,
-      colorDark: "#000000",
-      colorLight: "#f4e6c8",
-      correctLevel: QRCode.CorrectLevel.H
+  try {
+    document.querySelectorAll(".qr").forEach(el => {
+      new QRCode(el, {
+        text: el.dataset.link,
+        width: 146,
+        height: 146,
+        colorDark: "#000",
+        colorLight: "#f4e6c8",
+        correctLevel: QRCode.CorrectLevel.H
+      });
     });
-  });
+  } catch (e) {
+    console.error("QR FAIL:", e);
+  }
 
   setTimeout(() => {
-    window.scrollTo(0, document.body.scrollHeight);
     document.body.setAttribute("data-ready", "true");
   }, 300);
 }
-
 </script>
 
 </body>
