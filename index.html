@@ -6,17 +6,133 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-new QRCode(el, {
-  text: link,
-  width: 140,
-  height: 140,
-  colorDark: "#000000",
-  colorLight: "#f4e6c8",
-  correctLevel: QRCode.CorrectLevel.H
-});
+<style>
+body {
+  background: transparent;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  margin: 0;
+  padding: 10px;
+}
 
+#team {
+  max-width: 2000px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
 
+/* KARTA */
+.member {
+  background: #e6d8b5;
+  border-radius: 14px;
+  padding: 10px;
 
+  display: grid;
+  grid-template-columns: 100px 1fr 150px 170px;
+  align-items: center;
+  gap: 18px;
+
+  height: 150px;
+
+  box-shadow:
+    inset 0 2px 0 #fff5d8,
+    inset 0 -2px 0 rgba(0,0,0,0.08);
+}
+
+/* LEVEL */
+.level {
+  width: 80px;
+  height: 80px;
+  background: #5fa9d6;
+  border-radius: 50%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 28px;
+  font-weight: 900;
+  color: white;
+
+  box-shadow:
+    inset 0 4px 0 #8ec9f1,
+    0 2px 0 rgba(0,0,0,0.25);
+}
+
+/* JMÉNO */
+.name {
+  font-size: 28px;
+  font-weight: 900;
+  color: #2a2a2a;
+  line-height: 1;
+
+  text-shadow:
+    0 1px 0 #fff,
+    0 2px 0 rgba(0,0,0,0.1);
+}
+
+/* ROLE */
+.role {
+  font-size: 18px;
+  font-weight: bold;
+  color: #3c3c3c;
+  margin-top: 6px;
+}
+
+/* QR */
+.qr,
+.qr-empty {
+  width: 140px;
+  height: 140px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 5px;
+}
+
+.qr canvas {
+  width: 140px !important;
+  height: 140px !important;
+  image-rendering: pixelated;
+}
+
+.qr-badge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #000;
+  color: #fff;
+  font-weight: 900;
+  font-size: 18px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+
+/* STATS */
+.stats {
+  font-size: 24px;
+  font-weight: 900;
+  color: #111;
+}
+
+.stats div {
+  margin: 6px 0;
+}
+
+.icon {
+  width: 28px;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@media (max-width: 900px) {
+  #team { grid-template-columns: 1fr; }
+}
+</style>
 
 </head>
 
@@ -78,10 +194,10 @@ function generateQR() {
     const link = el.dataset.link;
     if (!link || link.trim() === "") return;
 
-new QRCode(el, {
-  text: link,
-  width: 120,
-  height: 120,
+    new QRCode(el, {
+      text: link,
+      width: 140,
+      height: 140,
       colorDark: "#000000",
       colorLight: "#f4e6c8",
       correctLevel: QRCode.CorrectLevel.H
