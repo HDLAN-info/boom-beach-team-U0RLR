@@ -23,31 +23,21 @@ html, body {
 
 #team {
   width: 2100px;
+  margin: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-/* fallback loader */
-.loading {
-  font-size: 80px;
-  padding: 200px;
-  color: #444;
-}
-
-/* member card */
 .member {
   background: #e6d8b5;
   border-radius: 16px;
   padding: 2px 8px 2px 2px;
-
   display: grid;
   grid-template-columns: 124px 1fr 150px 180px;
   align-items: center;
   gap: 20px;
-
   height: 162px;
-
   box-shadow:
     inset 0 2px 0 #fff5d8,
     inset 0 -2px 0 rgba(0,0,0,0.08);
@@ -61,34 +51,29 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-
   font-family: "Broshk", sans-serif;
   font-size: 70px;
   font-weight: 700;
   color: #fff;
-
   border: 4px solid #2b5f8f;
-
   text-shadow:
     -2px -2px 0 #000,
      2px -2px 0 #000,
     -2px  2px 0 #000,
      2px  2px 0 #000,
      0 4px 0 rgba(0,0,0,0.6);
-
   box-shadow:
     inset 0 6px 0 #a7d5f5,
     0 3px 0 rgba(0,0,0,0.35);
-
   margin-left: 14px;
 }
 
 .name {
   font-size: 60px;
   font-weight: 600;
-  color: #fff;
+  color: #ffffff;
   line-height: 1;
-
+  margin-top: -7px;
   text-shadow:
     -2px -2px 0 #000,
      2px -2px 0 #000,
@@ -101,6 +86,10 @@ html, body {
   font-size: 40px;
   font-weight: 600;
   color: #2a2a2a;
+  margin-top: 6px;
+  text-shadow:
+    0 1px 0 #fff,
+    0 2px 0 rgba(0,0,0,0.15);
 }
 
 .qr, .qr-empty {
@@ -120,81 +109,135 @@ html, body {
 
 .qr-badge {
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   background: #000;
   color: #fff;
   font-weight: 900;
   font-size: 18px;
   padding: 6px 12px;
   border-radius: 10px;
+  pointer-events: none;
 }
 
 .stats {
   font-size: 40px;
   font-weight: 600;
+  color: #111;
+}
+
+.stats div {
+  margin: 8px 0;
 }
 
 .icon {
   width: 60px;
+  vertical-align: middle;
   margin-right: 10px;
+}
+
+.intel {
+  transform: translateY(-5px);
 }
 </style>
 </head>
 
 <body>
 
-<div id="team" class="loading">Načítám…</div>
+<div id="team">Načítám…</div>
 
 <script>
-/* 🔥 CI fallback render — nikdy nečeká */
-document.body.setAttribute("data-ready", "true");
-
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
 
 const medalIcon = "img/medal.webp";
 const intelIcon = "img/intel.webp";
 
+function clean(v) {
+  return v.trim().replace(/^"+|"+$/g, "");
+}
+
 fetch(url)
 .then(r => r.text())
 .then(text => {
+
   const rows = text.trim().split("\n").slice(1);
   const container = document.getElementById("team");
-  container.className = "";
   container.innerHTML = "";
 
-  rows.forEach(row => {
+  const players = rows.map(row => {
     const cols = row.split(",");
-    if (cols.length < 6) return;
+    if (cols.length < 6) return null;
 
     const [name, level, role, medals, tickets, qr] = cols;
+
+    return {
+      name: clean(name),
+      level: clean(level),
+      role: clean(role),
+      medals: parseInt(clean(medals)) || 0,
+      tickets: clean(tickets),
+      qr: clean(qr)
+    };
+  }).filter(Boolean);
+
+  players.sort((a, b) => b.medals - a.medals);
+
+  players.forEach(p => {
+    const hasQR = p.qr !== "";
 
     const div = document.createElement("div");
     div.className = "member";
 
     div.innerHTML = `
-      <div class="level">${level}</div>
+      <div class="level">${p.level}</div>
       <div>
-        <div class="name">${name}</div>
-        <div class="role">${role}</div>
+        <div class="name">${p.name}</div>
+        <div class="role">${p.role}</div>
       </div>
-      ${qr ? `<div class="qr" data-link="${qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
+      ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
       <div class="stats">
-        <div><img class="icon" src="${medalIcon}">${medals}</div>
-        <div><img class="icon" src="${intelIcon}">${tickets}</div>
+        <div><img class="icon" src="${medalIcon}">${p.medals}</div>
+        <div><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
       </div>
     `;
 
     container.appendChild(div);
   });
 
-  document.querySelectorAll(".qr").forEach(el => {
-    new QRCode(el, {
-      text: el.dataset.link,
-      width: 146,
-      height: 146
-    });
-  });
+  setTimeout(generateQR, 50);
+
+})
+.catch(err => {
+
+  console.error("FETCH FAILED:", err);
+
+  document.getElementById("team").innerHTML = "Chyba načítání dat";
+  document.body.setAttribute("data-ready", "true");
 
 });
+
+function generateQR() {
+
+  try {
+    document.querySelectorAll(".qr").forEach(el => {
+      new QRCode(el, {
+        text: el.dataset.link,
+        width: 146,
+        height: 146,
+        colorDark: "#000",
+        colorLight: "#f4e6c8",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    });
+  } catch (e) {
+    console.error("QR FAIL:", e);
+  }
+
+  setTimeout(() => {
+    document.body.setAttribute("data-ready", "true");
+  }, 300);
+}
 </script>
 
 </body>
