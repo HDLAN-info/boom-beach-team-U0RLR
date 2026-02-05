@@ -1,15 +1,6 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-<meta charset="UTF-8">
-<title>Boom Beach Team</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<style>
 body {
-  background: #0b2c3c;
-  font-family: "Trebuchet MS", Arial, sans-serif;
+  background: transparent;
+  font-family: "Arial Black", Arial, sans-serif;
   margin: 0;
   padding: 20px;
 }
@@ -19,44 +10,54 @@ body {
   margin: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  gap: 14px;
 }
 
 .member {
-  background: #f4e6c8;
-  border-radius: 14px;
-  padding: 12px;
+  background: linear-gradient(#efe3c4, #e2d3ae);
+  border-radius: 18px;
+  padding: 14px 18px;
   display: grid;
-  grid-template-columns: 60px 1fr 120px 120px;
+  grid-template-columns: 70px 1fr 120px 110px;
   align-items: center;
-  gap: 12px;
-  box-shadow: inset 0 2px 0 #fff6da, 0 3px 6px rgba(0,0,0,0.4);
+  gap: 16px;
+  box-shadow:
+    inset 0 3px 0 #fff6da,
+    0 3px 8px rgba(0,0,0,0.25);
 }
 
+/* LEVEL BUBBLE */
 .level {
-  width: 52px;
-  height: 52px;
-  background: #5fa9d6;
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(#6eb3e2, #4b8fbd);
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-weight: bold;
-  font-size: 20px;
+  font-size: 22px;
   color: white;
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0,0,0,0.25);
 }
 
+/* NAME */
 .name {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
+  font-size: 22px;
+  font-weight: 900;
+  color: #2e2e2e;
+  text-shadow: 0 1px 0 #fff;
+  letter-spacing: 0.3px;
 }
 
+/* ROLE */
 .role {
-  font-size: 13px;
-  opacity: 0.7;
+  font-size: 14px;
+  color: #4c4c4c;
+  font-weight: bold;
 }
 
+/* QR */
 .qr,
 .qr-empty {
   position: relative;
@@ -77,21 +78,23 @@ body {
   transform: translate(-50%, -50%);
   background: #000;
   color: #fff;
-  font-weight: bold;
+  font-weight: 900;
   font-size: 14px;
   padding: 4px 8px;
   border-radius: 8px;
   pointer-events: none;
 }
 
+/* STATS */
 .stats {
-  font-size: 16px;
-  font-weight: bold;
+  font-size: 18px;
+  font-weight: 900;
+  color: #111;
   line-height: 1.4;
 }
 
 .icon {
-  width: 18px;
+  width: 20px;
   vertical-align: middle;
   margin-right: 6px;
 }
@@ -99,80 +102,3 @@ body {
 @media (max-width: 700px) {
   #team { grid-template-columns: 1fr; }
 }
-</style>
-</head>
-
-<body>
-
-<div id="team">Načítám…</div>
-
-<script>
-const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
-
-const medalIcon = "img/medal.webp";
-const intelIcon = "img/intel.webp";
-
-fetch(url)
-.then(r => r.text())
-.then(text => {
-  const rows = text.trim().split("\n").slice(1);
-  const container = document.getElementById("team");
-  container.innerHTML = "";
-
-  rows.forEach(row => {
-    const cols = row.split(",");
-    if (cols.length < 6) return;
-
-    const [name, level, role, medals, tickets, qr] = cols;
-    const hasQR = qr && qr.trim() !== "";
-
-    const div = document.createElement("div");
-    div.className = "member";
-
-    div.innerHTML = `
-      <div class="level">${level}</div>
-
-      <div>
-        <div class="name">${name}</div>
-        <div class="role">${role}</div>
-      </div>
-
-      ${hasQR ? `
-        <div class="qr" data-link="${qr}">
-          <div class="qr-badge">ID</div>
-        </div>
-      ` : `<div class="qr-empty"></div>`}
-
-      <div class="stats">
-        <div><img class="icon" src="${medalIcon}">${medals}</div>
-        <div><img class="icon" src="${intelIcon}">${tickets}</div>
-      </div>
-    `;
-
-    container.appendChild(div);
-  });
-
-  setTimeout(generateQR, 50);
-});
-
-function generateQR() {
-  document.querySelectorAll(".qr").forEach(el => {
-    const link = el.dataset.link;
-    if (!link || link.trim() === "") return;
-
-    new QRCode(el, {
-      text: link,
-      width: 120,
-      height: 120,
-      colorDark: "#000000",
-      colorLight: "#f4e6c8",
-      correctLevel: QRCode.CorrectLevel.H
-    });
-
-    el.onclick = () => window.open(link, "_blank");
-  });
-}
-</script>
-
-</body>
-</html>
