@@ -166,6 +166,9 @@ body {
 @media (max-width: 1000px) {
   #team { grid-template-columns: 1fr; }
 }
+  .intel {
+  transform: translateY(-2px);
+}
 </style>
 
 
@@ -214,7 +217,7 @@ fetch(url)
 
       <div class="stats">
         <div><img class="icon" src="${medalIcon}">${medals}</div>
-        <div><img class="icon" src="${intelIcon}">${tickets}</div>
+        <div><img class="icon intel" src="${intelIcon}">${tickets}</div>
       </div>
     `;
 
