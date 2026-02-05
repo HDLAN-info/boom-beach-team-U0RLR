@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=2132, initial-scale=1">
+<meta name="viewport" content="width=2100, initial-scale=1">
 <title>Boom Beach Team</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -13,19 +13,17 @@
   src: url("fonts/broshk.ttf") format("truetype");
 }
 
-/* 🔥 screenshot safe layout */
 html, body {
   margin: 0;
-  padding: 0 16px; /* ← symetrické okraje */
-  width: 2132px;   /* 2100 + 16 + 16 */
-  overflow: hidden;
+  padding: 0;
+  width: 2100px;
   background: transparent;
   font-family: "Trebuchet MS", Arial, sans-serif;
 }
 
 #team {
   width: 2100px;
-  margin: 0 auto;
+  margin: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
@@ -213,6 +211,7 @@ fetch(url)
 .catch(err => {
 
   console.error("FETCH FAILED:", err);
+
   document.getElementById("team").innerHTML = "Chyba načítání dat";
   document.body.setAttribute("data-ready", "true");
 
