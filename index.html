@@ -18,7 +18,6 @@ html, body {
   margin: 0;
   padding: 0;
   width: 2100px;
-  overflow: hidden;
   background: transparent;
   font-family: "Trebuchet MS", Arial, sans-serif;
 }
@@ -235,14 +234,10 @@ setTimeout(() => generateQR(), 50);
 
 function generateQR() {
   const elements = document.querySelectorAll(".qr");
-  let done = 0;
 
   elements.forEach(el => {
     const link = el.dataset.link;
-    if (!link) {
-      done++;
-      return;
-    }
+    if (!link) return;
 
     new QRCode(el, {
       text: link,
@@ -252,12 +247,10 @@ function generateQR() {
       colorLight: "#f4e6c8",
       correctLevel: QRCode.CorrectLevel.H
     });
-
-    done++;
   });
 
-  // počkej, až se DOM fakt dokreslí
   setTimeout(() => {
+    window.scrollTo(0, document.body.scrollHeight);
     document.body.setAttribute("data-ready", "true");
   }, 300);
 }
