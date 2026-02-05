@@ -120,8 +120,13 @@ fetch(url)
         </div>
 
 <div class="qr">
-  ${qr ? `<img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qr.trim())}">` : ""}
+  ${qr ? `
+    <a href="${qr}" target="_blank">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(qr.trim())}">
+    </a>
+  ` : ""}
 </div>
+
 
 
         <div class="stats">
