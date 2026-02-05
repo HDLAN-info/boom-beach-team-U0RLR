@@ -19,19 +19,21 @@ body {
   margin: auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 10px;
 }
 
-/* BOOM BEACH ROW */
+/* BOOM BEACH CARD */
 .member {
   background: #e6d8b5;
-  border-radius: 8px;
-  padding: 6px 12px;
+  border-radius: 10px;
+  padding: 10px 14px;
 
   display: grid;
-  grid-template-columns: 60px 1fr 90px 110px;
+  grid-template-columns: 70px 1fr 140px 110px;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+
+  min-height: 140px;
 
   box-shadow:
     inset 0 1px 0 #fff5d8,
@@ -40,8 +42,8 @@ body {
 
 /* LEVEL */
 .level {
-  width: 44px;
-  height: 44px;
+  width: 56px;
+  height: 56px;
   background: #5fa9d6;
   border-radius: 50%;
 
@@ -49,18 +51,18 @@ body {
   justify-content: center;
   align-items: center;
 
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 900;
   color: white;
 
   box-shadow:
-    inset 0 2px 0 #8ec9f1,
-    0 1px 0 rgba(0,0,0,0.25);
+    inset 0 3px 0 #8ec9f1,
+    0 2px 0 rgba(0,0,0,0.25);
 }
 
 /* NAME */
 .name {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 900;
   color: #2a2a2a;
   line-height: 1;
@@ -72,27 +74,26 @@ body {
 
 /* ROLE */
 .role {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: bold;
   color: #3c3c3c;
-  margin-top: 2px;
+  margin-top: 4px;
 }
 
 /* QR */
 .qr,
 .qr-empty {
-  width: 80px;
-  height: 80px;
+  width: 120px;
+  height: 120px;
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden; /* ← KLÍČOVÉ */
 }
 
 .qr canvas {
-  width: 80px !important;
-  height: 80px !important;
+  width: 120px !important;
+  height: 120px !important;
   image-rendering: pixelated;
 }
 
@@ -104,34 +105,34 @@ body {
   background: #000;
   color: #fff;
   font-weight: 900;
-  font-size: 12px;
-  padding: 3px 6px;
-  border-radius: 6px;
+  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 8px;
   pointer-events: none;
 }
 
 /* STATS */
 .stats {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 900;
   color: #111;
-  text-align: left;
-}
-
-.icon {
-  width: 18px;
-  vertical-align: middle;
-  margin-right: 6px;
 }
 
 .stats div {
-  margin: 2px 0;
+  margin: 4px 0;
+}
+
+.icon {
+  width: 20px;
+  vertical-align: middle;
+  margin-right: 6px;
 }
 
 @media (max-width: 700px) {
   #team { grid-template-columns: 1fr; }
 }
 </style>
+
 
 
 </head>
@@ -196,8 +197,8 @@ function generateQR() {
 
 new QRCode(el, {
   text: link,
-  width: 80,
-  height: 80,
+  width: 120,
+  height: 120,
       colorDark: "#000000",
       colorLight: "#f4e6c8",
       correctLevel: QRCode.CorrectLevel.H
