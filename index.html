@@ -184,6 +184,17 @@ const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS
 const medalIcon = "img/medal.webp";
 const intelIcon = "img/intel.webp";
 
+/* CSV cleanup — zachová JEDNY uvozovky */
+function clean(v) {
+  v = v.trim();
+
+  if (v.startsWith('"') && v.endsWith('"')) {
+    v = '"' + v.replace(/^"+|"+$/g, "") + '"';
+  }
+
+  return v;
+}
+
 fetch(url)
 .then(r => r.text())
 .then(text => {
@@ -196,25 +207,25 @@ fetch(url)
     const cols = row.split(",");
     if (cols.length < 6) return null;
 
-    const [name, level, role, medals, tickets, qr] = cols;
+    const [nameRaw, levelRaw, roleRaw, medalsRaw, ticketsRaw, qrRaw] = cols;
 
     return {
-      name,
-      level,
-      role,
-      medals: parseInt(medals) || 0,
-      tickets,
-      qr
+      name: clean(nameRaw),
+      level: clean(levelRaw),
+      role: clean(roleRaw),
+      medals: parseInt(clean(medalsRaw)) || 0,
+      tickets: clean(ticketsRaw),
+      qr: clean(qrRaw)
     };
   }).filter(Boolean);
 
-  // 🔥 seřadíme podle medals (nejvyšší nahoře)
+  // 🔥 řazení podle medals
   players.sort((a, b) => b.medals - a.medals);
 
   // 🔥 vykreslení
   players.forEach(p => {
     const { name, level, role, medals, tickets, qr } = p;
-    const hasQR = qr && qr.trim() !== "";
+    const hasQR = qr !== "";
 
     const div = document.createElement("div");
     div.className = "member";
@@ -248,7 +259,7 @@ fetch(url)
 function generateQR() {
   document.querySelectorAll(".qr").forEach(el => {
     const link = el.dataset.link;
-    if (!link || link.trim() === "") return;
+    if (!link) return;
 
     new QRCode(el, {
       text: link,
@@ -263,6 +274,7 @@ function generateQR() {
   });
 }
 </script>
+
 
 
 </body>
