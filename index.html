@@ -34,4 +34,136 @@ body {
 }
 
 .level {
-  width: 52p
+  width: 52px;
+  height: 52px;
+  background: #5fa9d6;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  font-size: 20px;
+  color: white;
+}
+
+.name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.role {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.qr {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  cursor: pointer;
+}
+
+.qr canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.qr::after {
+  content: "ID";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #f4e6c8;
+  padding: 3px 6px;
+  font-weight: bold;
+  font-size: 11px;
+  border-radius: 4px;
+}
+
+.stats {
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.icon {
+  width: 18px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@media (max-width: 700px) {
+  #team { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div id="team">Načítám…</div>
+
+<script>
+const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
+
+const medalIcon = "img/medal.webp";
+const intelIcon = "img/intel.webp";
+
+fetch(url)
+.then(r => r.text())
+.then(text => {
+  const rows = text.trim().split("\n").slice(1);
+  const container = document.getElementById("team");
+  container.innerHTML = "";
+
+  rows.forEach(row => {
+    const cols = row.split(",");
+    if (cols.length < 6) return;
+
+    const [name, level, role, medals, tickets, qr] = cols;
+
+    const div = document.createElement("div");
+    div.className = "member";
+
+    div.innerHTML = `
+      <div class="level">${level}</div>
+      <div>
+        <div class="name">${name}</div>
+        <div class="role">${role}</div>
+      </div>
+      <div class="qr" data-link="${qr}"></div>
+      <div class="stats">
+        <div><img class="icon" src="${medalIcon}">${medals}</div>
+        <div><img class="icon" src="${intelIcon}">${tickets}</div>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  // ⏱️ počkáme až DOM existuje
+  setTimeout(generateQR, 50);
+});
+
+function generateQR() {
+  document.querySelectorAll(".qr").forEach(el => {
+    const link = el.dataset.link;
+    if (!link) return;
+
+    new QRCode(el, {
+      text: link,
+      width: 120,
+      height: 120,
+      colorDark: "#000000",
+      colorLight: "#f4e6c8",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    el.onclick = () => window.open(link, "_blank");
+  });
+}
+</script>
+
+</body>
+</html>
