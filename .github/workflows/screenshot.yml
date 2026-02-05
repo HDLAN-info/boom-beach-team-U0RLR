@@ -1,0 +1,33 @@
+name: Screenshot leaderboard
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # každých 5 minut
+  workflow_dispatch:
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Chromium
+        run: sudo apt-get install -y chromium-browser
+
+      - name: Take screenshot
+        run: |
+          chromium-browser \
+            --headless \
+            --disable-gpu \
+            --window-size=2100,2000 \
+            --screenshot=leaderboard.png \
+            https://hdlan-info.github.io/boom-beach-team-8C0299VL/
+
+      - name: Commit screenshot
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add leaderboard.png
+          git commit -m "Update screenshot" || echo "No changes"
+          git push
