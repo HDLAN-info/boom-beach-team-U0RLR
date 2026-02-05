@@ -31,9 +31,6 @@ jobs:
             --screenshot=leaderboard.png \
             https://hdlan-info.github.io/boom-beach-team-8C0299VL/
 
-      - name: Pull latest changes
-        run: git pull --rebase
-
       - name: Commit screenshot
         run: |
           git config --global user.name "github-actions"
