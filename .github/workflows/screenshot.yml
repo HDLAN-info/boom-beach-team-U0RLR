@@ -1,51 +1,61 @@
-name: screenshot
+name: Screenshot leaderboard
 
 on:
-  workflow_dispatch:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
 
 jobs:
   screenshot:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install Chromium
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      # 🔥 čekáme dokud stránka neřekne "ready"
-      - name: Wait until page is ready
-        run: |
-          until chromium-browser \
-            --headless \
-            --no-sandbox \
-            --disable-dev-shm-usage \
-            --disable-gpu \
-            --virtual-time-budget=15000 \
-            --dump-dom \
-            https://hdlan-info.github.io/boom-beach-team-8C0299VL/ \
-            | grep 'data-ready="true"'
-          do
-            echo "Waiting for render..."
-            sleep 1
-          done
+      - name: Install Puppeteer
+        run: npm install puppeteer
 
       - name: Take screenshot
         run: |
-          chromium-browser \
-            --headless \
-            --no-sandbox \
-            --disable-dev-shm-usage \
-            --disable-gpu \
-            --hide-scrollbars \
-            --window-size=2100,5000 \
-            --screenshot=leaderboard.png \
-            https://hdlan-info.github.io/boom-beach-team-8C0299VL/
+          node <<'EOF'
+          const puppeteer = require('puppeteer');
+
+          (async () => {
+            const browser = await puppeteer.launch({
+              args: ['--no-sandbox', '--disable-setuid-sandbox']
+            });
+
+            const page = await browser.newPage();
+
+            await page.setViewport({
+              width: 2100,
+              height: 5000
+            });
+
+            await page.goto(
+              'https://hdlan-info.github.io/boom-beach-team-8C0299VL/',
+              { waitUntil: 'networkidle0' }
+            );
+
+            // počkej až JS nastaví flag
+            await page.waitForFunction(
+              () => document.body.dataset.ready === "true",
+              { timeout: 20000 }
+            );
+
+            await page.screenshot({
+              path: 'leaderboard.png',
+              fullPage: true
+            });
+
+            await browser.close();
+          })();
+          EOF
 
       - name: Commit screenshot
         run: |
