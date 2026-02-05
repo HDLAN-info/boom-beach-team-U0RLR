@@ -230,7 +230,7 @@ fetch(url)
     container.appendChild(div);
   });
 
-  setTimeout(generateQR, 50);
+setTimeout(() => generateQR(), 50);
 });
 
 function generateQR() {
@@ -247,6 +247,9 @@ function generateQR() {
       correctLevel: QRCode.CorrectLevel.H
     });
   });
+
+  // 👇 TADY říkáme: stránka hotová
+  document.body.setAttribute("data-ready", "true");
 }
 </script>
 
