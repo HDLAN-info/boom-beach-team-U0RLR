@@ -26,7 +26,7 @@ body {
 .member {
   background: #e6d8b5;
   border-radius: 16px;
-  padding: 8px;
+  padding: 2px 8px 2px 2px;
 
   display: grid;
   grid-template-columns: 110px 1fr 150px 180px;
@@ -42,22 +42,28 @@ body {
 
 /* LEVEL */
 .level {
-  width: 90px;
-  height: 90px;
-  background: #5fa9d6;
+  width: 96px;
+  height: 96px;
+  background: #6fb6e5;
   border-radius: 50%;
 
   display: flex;
   justify-content: center;
   align-items: center;
 
-  font-size: 32px;
+  font-size: 40px;
   font-weight: 900;
-  color: white;
+  color: #ffffff;
+
+  border: 4px solid #2b5f8f; /* tmavý obrys */
+
+  text-shadow:
+    0 3px 0 #000,
+    0 0 6px rgba(0,0,0,0.5);
 
   box-shadow:
-    inset 0 5px 0 #8ec9f1,
-    0 2px 0 rgba(0,0,0,0.25);
+    inset 0 6px 0 #a7d5f5,
+    0 3px 0 rgba(0,0,0,0.35);
 }
 
 /* JMÉNO */
