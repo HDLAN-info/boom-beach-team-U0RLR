@@ -17,14 +17,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y chromium-browser
 
-      - name: Take screenshot
+      - name: Take full screenshot
         run: |
           chromium-browser \
             --headless \
             --disable-gpu \
             --hide-scrollbars \
-            --virtual-time-budget=20000 \
-            --window-size=2100,10000 \
+            --run-all-compositor-stages-before-draw \
+            --virtual-time-budget=30000 \
             --screenshot=leaderboard.png \
             https://hdlan-info.github.io/boom-beach-team-8C0299VL/
 
