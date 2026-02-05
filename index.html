@@ -2,6 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=2100, initial-scale=1">
 <title>Boom Beach Team</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -12,10 +13,11 @@
   src: url("fonts/broshk.ttf") format("truetype");
 }
 
-/* 🔥 DŮLEŽITÉ — žádný scroll */
+/* 🔥 čistý render pro screenshot */
 html, body {
   margin: 0;
   padding: 0;
+  width: 2100px;
   overflow: hidden;
   background: transparent;
   font-family: "Trebuchet MS", Arial, sans-serif;
@@ -23,13 +25,12 @@ html, body {
 
 /* CONTAINER */
 #team {
-  width: 2100px;      /* pevná šířka = žádné zalamování */
-  margin: 0 auto;
+  width: 2100px;
+  margin: 0;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-
 
 /* KARTA */
 .member {
@@ -160,20 +161,10 @@ html, body {
 .intel {
   transform: translateY(-5px);
 }
-
-@media (max-width: 1000px) {
-  #team { grid-template-columns: 1fr; }
-}
 </style>
 </head>
 
-<body style="
-  background: transparent;
-  margin: 0;
-  padding: 10px;
-  width: 2100px;
-  overflow: hidden;
-">
+<body>
 
 <div id="team">Načítám…</div>
 
@@ -183,7 +174,6 @@ const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS
 const medalIcon = "img/medal.webp";
 const intelIcon = "img/intel.webp";
 
-/* CSV cleanup */
 function clean(v) {
   v = v.trim();
   if (v.startsWith('"') && v.endsWith('"')) {
@@ -215,7 +205,6 @@ fetch(url)
     };
   }).filter(Boolean);
 
-  // sort podle medals
   players.sort((a, b) => b.medals - a.medals);
 
   players.forEach(p => {
@@ -257,12 +246,9 @@ function generateQR() {
       colorLight: "#f4e6c8",
       correctLevel: QRCode.CorrectLevel.H
     });
-
-    el.onclick = () => window.open(link, "_blank");
   });
 }
 </script>
 
 </body>
-
 </html>
