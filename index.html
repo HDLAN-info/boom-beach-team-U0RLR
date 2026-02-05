@@ -1,3 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Test</title>
+</head>
+
+<body style="background:black;color:white">
+
+<h1>TEST</h1>
+<div id="team">Loading…</div>
+
+<script>
+const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
+
+fetch(url)
+  .then(r => r.text())
+  .then(t => {
+    document.getElementById("team").innerText = t;
+  })
+  .catch(e => {
+    document.getElementById("team").innerText = "ERROR: " + e;
+  });
+</script>
+
+</body>
+</html>
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
 
