@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <title>Boom Beach Team</title>
 
+<!-- QR knihovna -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
 body {
   background: #0b2c3c;
@@ -40,110 +43,4 @@ body {
   justify-content: center;
   align-items: center;
   font-weight: bold;
-  font-size: 20px;
-  color: white;
-  box-shadow: inset 0 3px 0 #89c8f0;
-}
-
-.name {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-
-.role {
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-.qr img {
-  width: 70px;
-  height: 70px;
-  border-radius: 4px;
-  background: transparent;
-}
-
-.stats {
-  font-size: 16px;
-  font-weight: bold;
-  line-height: 1.4;
-}
-
-.icon {
-  width: 18px;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-
-/* mobil */
-@media (max-width: 700px) {
-  #team {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
-</head>
-
-<body>
-
-<div id="team">Načítám…</div>
-
-<script>
-const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
-
-/* ikonky – můžeš nahradit vlastními PNG */
-const medalIcon = "img/medal.webp";
-const intelIcon = "img/intel.webp";
-
-fetch(url)
-  .then(r => r.text())
-  .then(text => {
-    const rows = text.trim().split("\n").slice(1);
-    const container = document.getElementById("team");
-    container.innerHTML = "";
-
-    rows.forEach(row => {
-      const cols = row.split(",");
-      if (cols.length < 6) return;
-
-      const [name, level, role, medals, tickets, qr] = cols;
-
-      const div = document.createElement("div");
-      div.className = "member";
-
-      div.innerHTML = `
-        <div class="level">${level}</div>
-
-        <div>
-          <div class="name">${name}</div>
-          <div class="role">${role}</div>
-        </div>
-
-<div class="qr">
-  ${qr ? `
-    <a href="${qr}" target="_blank">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&bgcolor=f4e6c8&color=000000&data=${encodeURIComponent(qr.trim())}">
-
-
-    </a>
-  ` : ""}
-</div>
-
-
-
-        <div class="stats">
-          <div><img class="icon" src="${medalIcon}">${medals}</div>
-          <div><img class="icon" src="${intelIcon}">${tickets}</div>
-        </div>
-      `;
-
-      container.appendChild(div);
-    });
-  })
-  .catch(e => {
-    document.getElementById("team").innerHTML = "CHYBA: " + e;
-  });
-</script>
-
-</body>
-</html>
+  font-size: 2
