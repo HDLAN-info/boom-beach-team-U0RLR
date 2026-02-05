@@ -1,101 +1,38 @@
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-<meta charset="UTF-8">
-<title>Boom Beach Team</title>
-
-<style>
-body {
-  background: #0b2c3c;
-  font-family: "Trebuchet MS", Arial, sans-serif;
-  margin: 0;
-  padding: 20px;
-}
-
-#team {
-  max-width: 1000px;
-  margin: auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.member {
-  background: #f4e6c8;
-  border-radius: 12px;
-  padding: 10px;
-  display: grid;
-  grid-template-columns: 60px 1fr auto 70px;
-  align-items: center;
-  gap: 10px;
-  box-shadow: inset 0 2px 0 #fff6da, 0 3px 6px rgba(0,0,0,0.4);
-  transition: transform 0.1s ease;
-}
-
-.member:hover {
-  transform: scale(1.02);
-}
-
-.level {
-  width: 52px;
-  height: 52px;
-  background: #5fa9d6;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-weight: bold;
-  font-size: 20px;
-  color: white;
-  box-shadow: inset 0 3px 0 #89c8f0;
-}
-
-.name {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-}
-
-.role {
-  font-size: 13px;
-  opacity: 0.7;
-}
-
-.stats {
-  text-align: right;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.qr img {
-  width: 60px;
-  height: 60px;
-  border-radius: 6px;
-}
-
-/* mobil */
-@media (max-width: 700px) {
-  #team {
-    grid-template-columns: 1fr;
-  }
-}
-</style>
-</head>
-
-<body>
-
-<div id="team"></div>
-
 <script>
 const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
 
+function parseCSV(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let insideQuotes = false;
+
+  for (let char of text) {
+    if (char === '"' ) {
+      insideQuotes = !insideQuotes;
+    } else if (char === ',' && !insideQuotes) {
+      row.push(cell);
+      cell = "";
+    } else if (char === '\n' && !insideQuotes) {
+      row.push(cell);
+      rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell);
+  rows.push(row);
+  return rows;
+}
+
 fetch(sheetURL)
   .then(res => res.text())
-  .then(data => {
-    const rows = data.trim().split("\n").slice(1);
+  .then(text => {
+    const data = parseCSV(text).slice(1);
     const container = document.getElementById("team");
 
-    rows.forEach(row => {
-      const [name, level, role, medals, tickets, qr] = row.split(",");
-
-      const div = document.creat
+    data.forEach(cols => {
+      const [name, level, role, medals,]()
