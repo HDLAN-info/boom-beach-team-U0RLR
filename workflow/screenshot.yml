@@ -1,8 +1,8 @@
-name: Auto Screenshot
+name: Screenshot leaderboard
 
 on:
   schedule:
-    - cron: "*/1 * * * *"  # každou minutu
+    - cron: "*/5 * * * *"   # každých 5 minut
   workflow_dispatch:
 
 jobs:
@@ -10,24 +10,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Chromium
-        run: sudo apt install chromium-browser -y
+        run: sudo apt-get install -y chromium-browser
 
-      - name: Screenshot
+      - name: Take screenshot
         run: |
           chromium-browser \
             --headless \
             --disable-gpu \
-            --window-size=2100,1200 \
+            --window-size=2100,2000 \
             --screenshot=leaderboard.png \
-            https://hdlan-info.github.io/
+            https://hdlan-info.github.io/boom-beach-team-8C0299VL/
 
-      - name: Commit image
+      - name: Commit screenshot
         run: |
-          git config user.name "bot"
-          git config user.email "bot@github.com"
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
           git add leaderboard.png
-          git commit -m "auto update screenshot"
+          git commit -m "Update screenshot" || echo "No changes"
           git push
