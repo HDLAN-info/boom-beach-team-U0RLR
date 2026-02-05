@@ -191,11 +191,29 @@ fetch(url)
   const container = document.getElementById("team");
   container.innerHTML = "";
 
-  rows.forEach(row => {
+  // 🔥 převedeme na objekty
+  const players = rows.map(row => {
     const cols = row.split(",");
-    if (cols.length < 6) return;
+    if (cols.length < 6) return null;
 
     const [name, level, role, medals, tickets, qr] = cols;
+
+    return {
+      name,
+      level,
+      role,
+      medals: parseInt(medals) || 0,
+      tickets,
+      qr
+    };
+  }).filter(Boolean);
+
+  // 🔥 seřadíme podle medals (nejvyšší nahoře)
+  players.sort((a, b) => b.medals - a.medals);
+
+  // 🔥 vykreslení
+  players.forEach(p => {
+    const { name, level, role, medals, tickets, qr } = p;
     const hasQR = qr && qr.trim() !== "";
 
     const div = document.createElement("div");
@@ -245,6 +263,7 @@ function generateQR() {
   });
 }
 </script>
+
 
 </body>
 </html>
