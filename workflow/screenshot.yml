@@ -1,0 +1,33 @@
+name: Auto Screenshot
+
+on:
+  schedule:
+    - cron: "*/1 * * * *"  # každou minutu
+  workflow_dispatch:
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Chromium
+        run: sudo apt install chromium-browser -y
+
+      - name: Screenshot
+        run: |
+          chromium-browser \
+            --headless \
+            --disable-gpu \
+            --window-size=2100,1200 \
+            --screenshot=leaderboard.png \
+            https://hdlan-info.github.io/
+
+      - name: Commit image
+        run: |
+          git config user.name "bot"
+          git config user.email "bot@github.com"
+          git add leaderboard.png
+          git commit -m "auto update screenshot"
+          git push
