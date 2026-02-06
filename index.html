@@ -164,36 +164,62 @@ const medalIcon = "img/medal.webp";
 const intelIcon = "img/intel.webp";
 
 function clean(v) {
-  return v.trim().replace(/^"+|"+$/g, "");
+  return (v || "").trim().replace(/^"+|"+$/g, "");
+}
+
+function parseCSVRow(row) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < row.length; i++) {
+    const char = row[i];
+
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
+      result.push(current);
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+
+  result.push(current);
+  return result;
 }
 
 fetch(url)
 .then(r => r.text())
 .then(text => {
 
-  const rows = text.trim().split("\n").slice(1);
-  const container = document.getElementById("team");
-  container.innerHTML = "";
+  const rows = text.trim().split("\n");
 
-  const players = rows.map(row => {
-    const cols = row.split(",");
-    if (cols.length < 6) return null;
+  const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
+  const idx = name => header.indexOf(name.toLowerCase());
 
-    const [name, level, role, medals, tickets, qr] = cols;
+  const players = rows.slice(1).map(row => {
+
+    const cols = parseCSVRow(row);
 
     return {
-      name: clean(name),
-      level: clean(level),
-      role: clean(role),
-      medals: parseInt(clean(medals)) || 0,
-      tickets: clean(tickets),
-      qr: clean(qr)
+      name: clean(cols[idx("name")]),
+      level: clean(cols[idx("level")]),
+      role: clean(cols[idx("role")]),
+      medals: parseInt(clean(cols[idx("vp")])) || 0,
+      tickets: clean(cols[idx("intels")]),
+      qr: clean(cols[idx("qr")])
     };
-  }).filter(Boolean);
+
+  }).filter(p => p.name !== "");
 
   players.sort((a, b) => b.medals - a.medals);
 
+  const container = document.getElementById("team");
+  container.innerHTML = "";
+
   players.forEach(p => {
+
     const hasQR = p.qr !== "";
 
     const div = document.createElement("div");
@@ -219,12 +245,8 @@ fetch(url)
 
 })
 .catch(err => {
-
   console.error("FETCH FAILED:", err);
-
   document.getElementById("team").innerHTML = "Chyba načítání dat";
-  document.body.setAttribute("data-ready", "true");
-
 });
 
 function generateQR() {
@@ -249,6 +271,7 @@ function generateQR() {
   }, 300);
 }
 </script>
+
 
 </body>
 </html>
