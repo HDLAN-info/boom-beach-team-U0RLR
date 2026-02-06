@@ -8,143 +8,50 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-@font-face {
-  font-family: "Broshk";
-  src: url("fonts/broshk.ttf") format("truetype");
-}
-
-html, body {
+body {
   margin: 0;
   padding: 0;
   width: 2100px;
-  font-family: "Trebuchet MS", Arial, sans-serif;
-  background: url("img/noise.png") repeat, #f5edd1;
+  font-family: Arial, sans-serif;
+  background: #f5edd1;
 }
 
 #team {
   width: 2100px;
-  margin: 0;
   padding: 16px;
-  box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
 .member {
-  background: url("img/noise.png") repeat, #e0d5b3;
+  background: #e0d5b3;
   border-radius: 16px;
-  padding: 2px 8px 2px 2px;
+  padding: 10px;
   display: grid;
-  grid-template-columns: 124px 1fr 150px 180px;
+  grid-template-columns: 120px 1fr 150px 180px;
   align-items: center;
   gap: 20px;
-  height: 162px;
-  box-shadow:
-    inset 0 2px 0 #fff5d8,
-    inset 0 -2px 0 rgba(0,0,0,0.10);
 }
 
-.level {
-  width: 110px;
-  height: 110px;
-  background: url("img/noise.png") repeat, #6fb6e5;
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: "Broshk", sans-serif;
-  font-size: 70px;
-  font-weight: 700;
-  color: #fff;
-  border: 4px solid #2b5f8f;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000,
-     0 4px 0 rgba(0,0,0,0.6);
-  box-shadow:
-    inset 0 6px 0 #a7d5f5,
-    0 3px 0 rgba(0,0,0,0.10);
-  margin-left: 14px;
-}
-
-.name {
-  font-size: 60px;
-  font-weight: 600;
-  line-height: 1;
-  margin-top: -7px;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000,
-     0 5px 0 rgba(0,0,0,0.6);
-}
-
-/* barvy podle role */
-.name.leader  { color: #ffd700; }
+.name { font-size: 42px; font-weight: bold; }
+.name.leader { color: gold; }
 .name.coleader { color: #2ecc71; }
 .name.officer { color: #3498db; }
-.name.member  { color: #ffffff; }
-.name.other   { color: #ff4d4d; }
+.name.member { color: white; }
+.name.other { color: red; }
 
-.role {
-  font-size: 40px;
-  font-weight: 600;
-  color: #2a2a2a;
-  margin-top: 6px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.10);
-}
+.role { font-size: 24px; }
 
 .qr, .qr-empty {
   width: 150px;
   height: 150px;
-  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.qr canvas {
-  width: 146px !important;
-  height: 146px !important;
-  image-rendering: pixelated;
-}
-
-.qr-badge {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #000;
-  color: #fff;
-  font-weight: 900;
-  font-size: 18px;
-  padding: 6px 12px;
-  border-radius: 10px;
-}
-
-.stats {
-  font-size: 40px;
-  font-weight: 600;
-  color: #111;
-}
-
-.stats div {
-  margin: 8px 0;
-}
-
-.icon {
-  width: 60px;
-  vertical-align: middle;
-  margin-right: 10px;
-}
-
-.intel {
-  transform: translateY(-5px);
-}
+.stats { font-size: 28px; }
 </style>
 </head>
 
@@ -155,33 +62,8 @@ html, body {
 <script>
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
 
-const medalIcon = "img/medal.webp";
-const intelIcon = "img/intel.webp";
-
-function clean(v) {
-  return (v || "").trim().replace(/^"+|"+$/g, "");
-}
-
-function parseCSVRow(row) {
-  const result = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < row.length; i++) {
-    const char = row[i];
-    if (char === '"') inQuotes = !inQuotes;
-    else if (char === "," && !inQuotes) {
-      result.push(current);
-      current = "";
-    } else current += char;
-  }
-
-  result.push(current);
-  return result;
-}
-
 function roleClass(role) {
-  const r = role.toLowerCase();
+  const r = (role || "").toLowerCase();
   if (r === "leader") return "leader";
   if (r === "co-leader") return "coleader";
   if (r === "officer") return "officer";
@@ -191,62 +73,48 @@ function roleClass(role) {
 
 fetch(url)
 .then(r => r.text())
-.then(data => {
+.then(text => {
 
-  const rows = data.feed.entry;
+  const rows = text.split("\n").slice(1, 51);
 
-  const players = rows.slice(0, 50).map(r => ({
-    name: clean(r.gsx$name.$t),
-    level: clean(r.gsx$level.$t),
-    role: clean(r.gsx$role.$t),
-    medals: parseInt(clean(r.gsx$vp.$t)) || 0,
-    tickets: clean(r.gsx$intels.$t),
-    qr: clean(r.gsx$qr.$t)
-  })).filter(p => p.name !== "");
-
-  players.sort((a, b) => b.medals - a.medals);
+  const players = rows.map(row => {
+    const cols = row.split(",");
+    return {
+      name: cols[0] || "",
+      level: cols[1] || "",
+      role: cols[2] || "",
+      medals: cols[3] || "",
+      tickets: cols[4] || "",
+      qr: cols[5] || ""
+    };
+  }).filter(p => p.name.trim() !== "");
 
   const container = document.getElementById("team");
   container.innerHTML = "";
 
   players.forEach(p => {
 
-    const hasQR = p.qr !== "";
-
     const div = document.createElement("div");
     div.className = "member";
 
     div.innerHTML = `
-      <div class="level">${p.level}</div>
+      <div>${p.level}</div>
       <div>
         <div class="name ${roleClass(p.role)}">${p.name}</div>
         <div class="role">${p.role}</div>
       </div>
-      ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
-      <div class="stats">
-        <div><img class="icon" src="${medalIcon}">${p.medals}</div>
-        <div><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
-      </div>
+      <div class="${p.qr ? "qr" : "qr-empty"}"></div>
+      <div class="stats">${p.medals} / ${p.tickets}</div>
     `;
 
     container.appendChild(div);
   });
 
-  setTimeout(generateQR, 50);
+})
+.catch(err => {
+  console.error(err);
+  document.getElementById("team").innerHTML = "Chyba načítání dat 😢";
 });
-  
-function generateQR() {
-  document.querySelectorAll(".qr").forEach(el => {
-    new QRCode(el, {
-      text: el.dataset.link,
-      width: 146,
-      height: 146,
-      colorDark: "#000",
-      colorLight: "#e0d5b3",
-      correctLevel: QRCode.CorrectLevel.H
-    });
-  });
-}
 </script>
 
 </body>
