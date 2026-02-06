@@ -18,16 +18,13 @@ html, body {
   padding: 0;
   width: 2100px;
   font-family: "Trebuchet MS", Arial, sans-serif;
-
-  background:
-    url("img/noise.png") repeat,
-    #f5edd1;
+  background: url("img/noise.png") repeat, #f5edd1;
 }
 
 #team {
   width: 2100px;
   margin: 0;
-  padding: 16px;        /* mezera nahoře/dole/vlevo/vpravo */
+  padding: 16px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -35,10 +32,7 @@ html, body {
 }
 
 .member {
-  background:
-    url("img/noise.png") repeat,
-    #e0d5b3;
-
+  background: url("img/noise.png") repeat, #e0d5b3;
   border-radius: 16px;
   padding: 2px 8px 2px 2px;
   display: grid;
@@ -46,19 +40,13 @@ html, body {
   align-items: center;
   gap: 20px;
   height: 162px;
-  box-shadow:
-    inset 0 2px 0 #fff5d8,
-    inset 0 -2px 0 rgba(0,0,0,0.10);
+  box-shadow: inset 0 2px 0 #fff5d8, inset 0 -2px 0 rgba(0,0,0,0.10);
 }
 
 .level {
   width: 110px;
   height: 110px;
-
-  background:
-    url("img/noise.png") repeat,
-    #6fb6e5;
-
+  background: url("img/noise.png") repeat, #6fb6e5;
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -68,30 +56,17 @@ html, body {
   font-weight: 700;
   color: #fff;
   border: 4px solid #2b5f8f;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000,
-     0 4px 0 rgba(0,0,0,0.6);
-  box-shadow:
-    inset 0 6px 0 #a7d5f5,
-    0 3px 0 rgba(0,0,0,0.10);
+  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 0 rgba(0,0,0,0.6);
+  box-shadow: inset 0 6px 0 #a7d5f5, 0 3px 0 rgba(0,0,0,0.10);
   margin-left: 14px;
 }
 
 .name {
   font-size: 60px;
   font-weight: 600;
-  color: #ffffff;
   line-height: 1;
   margin-top: -7px;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000,
-     0 5px 0 rgba(0,0,0,0.6);
+  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 5px 0 rgba(0,0,0,0.6);
 }
 
 .role {
@@ -99,7 +74,7 @@ html, body {
   font-weight: 600;
   color: #2a2a2a;
   margin-top: 6px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.10); /* jen tmavý stín */
+  text-shadow: 0 2px 0 rgba(0,0,0,0.10);
 }
 
 .qr, .qr-empty {
@@ -189,6 +164,18 @@ function parseCSVRow(row) {
   return result;
 }
 
+/* ✅ FUNKCE PRO BARVU ROLE */
+function roleColor(role) {
+  const r = role.toLowerCase();
+
+  if (r === "leader") return "yellow";
+  if (r === "co-leader") return "limegreen";
+  if (r === "officer") return "dodgerblue";
+  if (r === "member") return "black";
+
+  return "red";
+}
+
 fetch(url)
 .then(r => r.text())
 .then(text => {
@@ -220,6 +207,7 @@ fetch(url)
 
   players.forEach(p => {
 
+    const nameColor = roleColor(p.role);
     const hasQR = p.qr !== "";
 
     const div = document.createElement("div");
@@ -228,7 +216,7 @@ fetch(url)
     div.innerHTML = `
       <div class="level">${p.level}</div>
       <div>
-        <div class="name">${p.name}</div>
+        <div class="name" style="color:${nameColor}">${p.name}</div>
         <div class="role">${p.role}</div>
       </div>
       ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
@@ -250,7 +238,6 @@ fetch(url)
 });
 
 function generateQR() {
-
   try {
     document.querySelectorAll(".qr").forEach(el => {
       new QRCode(el, {
@@ -271,7 +258,6 @@ function generateQR() {
   }, 300);
 }
 </script>
-
 
 </body>
 </html>
