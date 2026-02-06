@@ -6,6 +6,7 @@
 <title>Boom Beach Team</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
 @font-face {
@@ -18,7 +19,6 @@ html, body {
   padding: 0;
   width: 2100px;
   font-family: "Trebuchet MS", Arial, sans-serif;
-
   background:
     url("img/noise.png") repeat,
     #f5edd1;
@@ -27,7 +27,7 @@ html, body {
 #team {
   width: 2100px;
   margin: 0;
-  padding: 16px;        /* mezera nahoře/dole/vlevo/vpravo */
+  padding: 16px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -54,7 +54,6 @@ html, body {
 .level {
   width: 110px;
   height: 110px;
-
   background:
     url("img/noise.png") repeat,
     #6fb6e5;
@@ -99,7 +98,7 @@ html, body {
   font-weight: 600;
   color: #2a2a2a;
   margin-top: 6px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.10); /* jen tmavý stín */
+  text-shadow: 0 2px 0 rgba(0,0,0,0.10);
 }
 
 .qr, .qr-empty {
@@ -219,16 +218,11 @@ fetch(url)
 
 })
 .catch(err => {
-
   console.error("FETCH FAILED:", err);
-
   document.getElementById("team").innerHTML = "Chyba načítání dat";
-  document.body.setAttribute("data-ready", "true");
-
 });
 
 function generateQR() {
-
   try {
     document.querySelectorAll(".qr").forEach(el => {
       new QRCode(el, {
@@ -244,9 +238,20 @@ function generateQR() {
     console.error("QR FAIL:", e);
   }
 
-  setTimeout(() => {
-    document.body.setAttribute("data-ready", "true");
-  }, 300);
+  setTimeout(exportJPG, 400);
+}
+
+function exportJPG() {
+  html2canvas(document.body, {
+    width: 2100,
+    height: document.body.scrollHeight,
+    scale: 1
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "team.jpg";
+    link.href = canvas.toDataURL("image/jpeg", 0.9);
+    link.click();
+  });
 }
 </script>
 
