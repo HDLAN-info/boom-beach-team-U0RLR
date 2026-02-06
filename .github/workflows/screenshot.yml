@@ -32,25 +32,23 @@ jobs:
 
             const page = await browser.newPage();
 
-            await page.setViewport({
-              width: 2116,
-              height: 4600
-            });
-
             await page.goto(
               'https://hdlan-info.github.io/boom-beach-team-8C0299VL/',
               { waitUntil: 'networkidle2' }
             );
 
-            // počkej až se vykreslí obsah
             await page.waitForSelector('#team');
-
-            // extra delay pro QR + fonty
             await new Promise(r => setTimeout(r, 2000));
 
+            await page.emulateMediaType('screen');
+
+            await page.setViewport({
+              width: 2116,
+              height: 4554
+            });
+
             await page.screenshot({
-              path: 'leaderboard.png',
-              fullPage: true
+              path: 'leaderboard.png'
             });
 
             await browser.close();
