@@ -18,13 +18,16 @@ html, body {
   padding: 0;
   width: 2100px;
   font-family: "Trebuchet MS", Arial, sans-serif;
-  background: url("img/noise.png") repeat, #f5edd1;
+
+  background:
+    url("img/noise.png") repeat,
+    #f5edd1;
 }
 
 #team {
   width: 2100px;
   margin: 0;
-  padding: 16px;
+  padding: 16px;        /* mezera nahoře/dole/vlevo/vpravo */
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -32,7 +35,10 @@ html, body {
 }
 
 .member {
-  background: url("img/noise.png") repeat, #e0d5b3;
+  background:
+    url("img/noise.png") repeat,
+    #e0d5b3;
+
   border-radius: 16px;
   padding: 2px 8px 2px 2px;
   display: grid;
@@ -48,7 +54,11 @@ html, body {
 .level {
   width: 110px;
   height: 110px;
-  background: url("img/noise.png") repeat, #6fb6e5;
+
+  background:
+    url("img/noise.png") repeat,
+    #6fb6e5;
+
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -84,19 +94,12 @@ html, body {
      0 5px 0 rgba(0,0,0,0.6);
 }
 
-/* 🎯 barvy jména podle role */
-.name.leader { color: #ffd700; }
-.name.coleader { color: #2ecc71; }
-.name.officer { color: #3498db; }
-.name.member { color: #ffffff; }
-.name.other { color: #ff4d4d; }
-
 .role {
   font-size: 40px;
   font-weight: 600;
   color: #2a2a2a;
   margin-top: 6px;
-  text-shadow: 0 2px 0 rgba(0 北京赛车怎么0,0.10);
+  text-shadow: 0 2px 0 rgba(0,0,0,0.10); /* jen tmavý stín */
 }
 
 .qr, .qr-empty {
@@ -171,25 +174,19 @@ function parseCSVRow(row) {
 
   for (let i = 0; i < row.length; i++) {
     const char = row[i];
-    if (char === '"') inQuotes = !inQuotes;
-    else if (char === "," && !inQuotes) {
+
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === "," && !inQuotes) {
       result.push(current);
       current = "";
-    } else current += char;
+    } else {
+      current += char;
+    }
   }
 
   result.push(current);
   return result;
-}
-
-/* 🎯 funkce pro barvu role */
-function roleClass(role) {
-  const r = (role || "").toLowerCase();
-  if (r === "leader") return "leader";
-  if (r === "co-leader") return "coleader";
-  if (r === "officer") return "officer";
-  if (r === "member") return "member";
-  return "other";
 }
 
 fetch(url)
@@ -201,7 +198,7 @@ fetch(url)
   const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
   const idx = name => header.indexOf(name.toLowerCase());
 
-  const players = rows.slice(1).map(row => {
+  const players = rows.slice(1, 51).map(row => {
 
     const cols = parseCSVRow(row);
 
@@ -231,7 +228,7 @@ fetch(url)
     div.innerHTML = `
       <div class="level">${p.level}</div>
       <div>
-        <div class="name ${roleClass(p.role)}">${p.name}</div>
+        <div class="name">${p.name}</div>
         <div class="role">${p.role}</div>
       </div>
       ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
@@ -253,6 +250,7 @@ fetch(url)
 });
 
 function generateQR() {
+
   try {
     document.querySelectorAll(".qr").forEach(el => {
       new QRCode(el, {
@@ -267,8 +265,13 @@ function generateQR() {
   } catch (e) {
     console.error("QR FAIL:", e);
   }
+
+  setTimeout(() => {
+    document.body.setAttribute("data-ready", "true");
+  }, 300);
 }
 </script>
+
 
 </body>
 </html>
