@@ -9,12 +9,6 @@
 
 <style>
 
-.role.leader { color: #ffd700; }
-.role.coleader { color: #2ecc71; }
-.role.officer { color: #3498db; }
-.role.member { color: #000000; }
-.role.other { color: #e74c3c; }
-  
 @font-face {
   font-family: "Broshk";
   src: url("fonts/broshk.ttf") format("truetype");
@@ -25,7 +19,6 @@ html, body {
   padding: 0;
   width: 2100px;
   font-family: "Trebuchet MS", Arial, sans-serif;
-
   background:
     url("img/noise.png") repeat,
     #f5edd1;
@@ -34,7 +27,7 @@ html, body {
 #team {
   width: 2100px;
   margin: 0;
-  padding: 16px;        /* mezera nahoře/dole/vlevo/vpravo */
+  padding: 16px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -61,11 +54,9 @@ html, body {
 .level {
   width: 110px;
   height: 110px;
-
   background:
     url("img/noise.png") repeat,
     #6fb6e5;
-
   border-radius: 50%;
   display: flex;
   justify-content: center;
@@ -90,7 +81,6 @@ html, body {
 .name {
   font-size: 60px;
   font-weight: 600;
-  color: #ffffff;
   line-height: 1;
   margin-top: -7px;
   text-shadow:
@@ -101,12 +91,19 @@ html, body {
      0 5px 0 rgba(0,0,0,0.6);
 }
 
+/* barvy podle role (aplikují se na NAME) */
+.name.leader  { color: #ffd700; }
+.name.coleader { color: #2ecc71; }
+.name.officer { color: #3498db; }
+.name.member  { color: #ffffff; }
+.name.other   { color: #ff4d4d; }
+
 .role {
   font-size: 40px;
   font-weight: 600;
   color: #2a2a2a;
   margin-top: 6px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.10); /* jen tmavý stín */
+  text-shadow: 0 2px 0 rgba(0,0,0,0.10);
 }
 
 .qr, .qr-empty {
@@ -157,6 +154,7 @@ html, body {
 .intel {
   transform: translateY(-5px);
 }
+
 </style>
 </head>
 
@@ -181,44 +179,36 @@ function parseCSVRow(row) {
 
   for (let i = 0; i < row.length; i++) {
     const char = row[i];
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === "," && !inQuotes) {
+    if (char === '"') inQuotes = !inQuotes;
+    else if (char === "," && !inQuotes) {
       result.push(current);
       current = "";
-    } else {
-      current += char;
-    }
+    } else current += char;
   }
 
   result.push(current);
   return result;
 }
 
- function roleClass(role) {
+function roleClass(role) {
   const r = role.toLowerCase();
-
   if (r === "leader") return "leader";
   if (r === "co-leader") return "coleader";
   if (r === "officer") return "officer";
   if (r === "member") return "member";
   return "other";
 }
-  
+
 fetch(url)
 .then(r => r.text())
 .then(text => {
 
   const rows = text.trim().split("\n");
-
   const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
   const idx = name => header.indexOf(name.toLowerCase());
 
   const players = rows.slice(1, 51).map(row => {
-
     const cols = parseCSVRow(row);
-
     return {
       name: clean(cols[idx("name")]),
       level: clean(cols[idx("level")]),
@@ -227,7 +217,6 @@ fetch(url)
       tickets: clean(cols[idx("intels")]),
       qr: clean(cols[idx("qr")])
     };
-
   }).filter(p => p.name !== "");
 
   players.sort((a, b) => b.medals - a.medals);
@@ -245,8 +234,8 @@ fetch(url)
     div.innerHTML = `
       <div class="level">${p.level}</div>
       <div>
-        <div class="name">${p.name}</div>
-        <div class="role ${roleClass(p.role)}">${p.role}</div>
+        <div class="name ${roleClass(p.role)}">${p.name}</div>
+        <div class="role">${p.role}</div>
       </div>
       ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
       <div class="stats">
@@ -267,28 +256,18 @@ fetch(url)
 });
 
 function generateQR() {
-
-  try {
-    document.querySelectorAll(".qr").forEach(el => {
-      new QRCode(el, {
-        text: el.dataset.link,
-        width: 146,
-        height: 146,
-        colorDark: "#000",
-        colorLight: "#e0d5b3",
-        correctLevel: QRCode.CorrectLevel.H
-      });
+  document.querySelectorAll(".qr").forEach(el => {
+    new QRCode(el, {
+      text: el.dataset.link,
+      width: 146,
+      height: 146,
+      colorDark: "#000",
+      colorLight: "#e0d5b3",
+      correctLevel: QRCode.CorrectLevel.H
     });
-  } catch (e) {
-    console.error("QR FAIL:", e);
-  }
-
-  setTimeout(() => {
-    document.body.setAttribute("data-ready", "true");
-  }, 300);
+  });
 }
 </script>
-
 
 </body>
 </html>
