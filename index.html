@@ -190,24 +190,19 @@ function roleClass(role) {
 }
 
 fetch(url)
-.then(r => r.text())
-.then(text => {
+.then(r => r.json())
+.then(data => {
 
-  const rows = text.trim().split("\n");
-  const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
-  const idx = name => header.indexOf(name.toLowerCase());
+  const rows = data.feed.entry;
 
-  const players = rows.slice(1, 51).map(row => {
-    const cols = parseCSVRow(row);
-    return {
-      name: clean(cols[idx("name")]),
-      level: clean(cols[idx("level")]),
-      role: clean(cols[idx("role")]),
-      medals: parseInt(clean(cols[idx("vp")])) || 0,
-      tickets: clean(cols[idx("intels")]),
-      qr: clean(cols[idx("qr")])
-    };
-  }).filter(p => p.name !== "");
+  const players = rows.slice(0, 50).map(r => ({
+    name: clean(r.gsx$name.$t),
+    level: clean(r.gsx$level.$t),
+    role: clean(r.gsx$role.$t),
+    medals: parseInt(clean(r.gsx$vp.$t)) || 0,
+    tickets: clean(r.gsx$intels.$t),
+    qr: clean(r.gsx$qr.$t)
+  })).filter(p => p.name !== "");
 
   players.sort((a, b) => b.medals - a.medals);
 
@@ -239,7 +234,7 @@ fetch(url)
 
   setTimeout(generateQR, 50);
 });
-
+  
 function generateQR() {
   document.querySelectorAll(".qr").forEach(el => {
     new QRCode(el, {
