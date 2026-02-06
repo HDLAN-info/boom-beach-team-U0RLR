@@ -33,7 +33,7 @@ jobs:
             const page = await browser.newPage();
 
             await page.setViewport({
-              width: 2132,
+              width: 2116,
               height: 4554
             });
 
