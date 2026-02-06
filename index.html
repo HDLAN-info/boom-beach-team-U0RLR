@@ -8,6 +8,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
+
+.role.leader { color: #ffd700; }
+.role.coleader { color: #2ecc71; }
+.role.officer { color: #3498db; }
+.role.member { color: #000000; }
+.role.other { color: #e74c3c; }
+  
 @font-face {
   font-family: "Broshk";
   src: url("fonts/broshk.ttf") format("truetype");
@@ -189,6 +196,16 @@ function parseCSVRow(row) {
   return result;
 }
 
+ function roleClass(role) {
+  const r = role.toLowerCase();
+
+  if (r === "leader") return "leader";
+  if (r === "co-leader") return "coleader";
+  if (r === "officer") return "officer";
+  if (r === "member") return "member";
+  return "other";
+}
+  
 fetch(url)
 .then(r => r.text())
 .then(text => {
@@ -198,7 +215,7 @@ fetch(url)
   const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
   const idx = name => header.indexOf(name.toLowerCase());
 
-  const players = rows.slice(1).map(row => {
+  const players = rows.slice(1, 51).map(row => {
 
     const cols = parseCSVRow(row);
 
@@ -229,7 +246,7 @@ fetch(url)
       <div class="level">${p.level}</div>
       <div>
         <div class="name">${p.name}</div>
-        <div class="role">${p.role}</div>
+        <div class="role ${roleClass(p.role)}">${p.role}</div>
       </div>
       ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
       <div class="stats">
