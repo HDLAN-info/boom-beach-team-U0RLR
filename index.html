@@ -8,40 +8,75 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-body {
+@font-face {
+  font-family: "Broshk";
+  src: url("fonts/broshk.ttf") format("truetype");
+}
+
+html, body {
   margin: 0;
   padding: 0;
   width: 2100px;
-  font-family: Arial, sans-serif;
-  background: #f5edd1;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  background: url("img/noise.png") repeat, #f5edd1;
 }
 
 #team {
   width: 2100px;
+  margin: 0;
   padding: 16px;
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
 .member {
-  background: #e0d5b3;
+  background: url("img/noise.png") repeat, #e0d5b3;
   border-radius: 16px;
-  padding: 10px;
+  padding: 2px 8px 2px 2px;
   display: grid;
-  grid-template-columns: 120px 1fr 150px 180px;
+  grid-template-columns: 124px 1fr 150px 180px;
   align-items: center;
   gap: 20px;
+  height: 162px;
 }
 
-.name { font-size: 42px; font-weight: bold; }
+.level {
+  width: 110px;
+  height: 110px;
+  background: #6fb6e5;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Broshk", sans-serif;
+  font-size: 70px;
+  font-weight: 700;
+  color: #fff;
+  border: 4px solid #2b5f8f;
+}
+
+.name {
+  font-size: 60px;
+  font-weight: 600;
+  line-height: 1;
+  margin-top: -7px;
+  color: white;
+}
+
+/* barvy podle role */
 .name.leader { color: gold; }
 .name.coleader { color: #2ecc71; }
 .name.officer { color: #3498db; }
 .name.member { color: white; }
 .name.other { color: red; }
 
-.role { font-size: 24px; }
+.role {
+  font-size: 40px;
+  font-weight: 600;
+  color: #2a2a2a;
+}
 
 .qr, .qr-empty {
   width: 150px;
@@ -51,7 +86,10 @@ body {
   align-items: center;
 }
 
-.stats { font-size: 28px; }
+.stats {
+  font-size: 40px;
+  font-weight: 600;
+}
 </style>
 </head>
 
@@ -62,8 +100,30 @@ body {
 <script>
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
 
+function clean(v) {
+  return (v || "").trim().replace(/^"+|"+$/g, "");
+}
+
+function parseCSVRow(row) {
+  const result = [];
+  let current = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < row.length; i++) {
+    const char = row[i];
+    if (char === '"') inQuotes = !inQuotes;
+    else if (char === "," && !inQuotes) {
+      result.push(current);
+      current = "";
+    } else current += char;
+  }
+
+  result.push(current);
+  return result;
+}
+
 function roleClass(role) {
-  const r = (role || "").toLowerCase();
+  const r = role.toLowerCase();
   if (r === "leader") return "leader";
   if (r === "co-leader") return "coleader";
   if (r === "officer") return "officer";
@@ -75,35 +135,43 @@ fetch(url)
 .then(r => r.text())
 .then(text => {
 
-  const rows = text.split("\n").slice(1, 51);
+  const rows = text.trim().split("\n");
+  const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
+  const idx = name => header.indexOf(name.toLowerCase());
 
-  const players = rows.map(row => {
-    const cols = row.split(",");
-    return {
-      name: cols[0] || "",
-      level: cols[1] || "",
-      role: cols[2] || "",
-      medals: cols[3] || "",
-      tickets: cols[4] || "",
-      qr: cols[5] || ""
-    };
-  }).filter(p => p.name.trim() !== "");
+  const players = rows
+    .slice(1)           // vše kromě hlavičky
+    .map(row => {
+      const cols = parseCSVRow(row);
+      return {
+        name: clean(cols[idx("name")]),
+        level: clean(cols[idx("level")]),
+        role: clean(cols[idx("role")]),
+        medals: parseInt(clean(cols[idx("vp")])) || 0,
+        tickets: clean(cols[idx("intels")]),
+        qr: clean(cols[idx("qr")])
+      };
+    })
+    .filter(p => p.name !== "") // odstraní prázdné
+    .slice(0, 50);              // vezme prvních 50 hráčů
 
   const container = document.getElementById("team");
   container.innerHTML = "";
 
   players.forEach(p => {
 
+    const hasQR = p.qr !== "";
+
     const div = document.createElement("div");
     div.className = "member";
 
     div.innerHTML = `
-      <div>${p.level}</div>
+      <div class="level">${p.level}</div>
       <div>
         <div class="name ${roleClass(p.role)}">${p.name}</div>
         <div class="role">${p.role}</div>
       </div>
-      <div class="${p.qr ? "qr" : "qr-empty"}"></div>
+      ${hasQR ? `<div class="qr" data-link="${p.qr}"></div>` : `<div class="qr-empty"></div>`}
       <div class="stats">${p.medals} / ${p.tickets}</div>
     `;
 
@@ -113,7 +181,7 @@ fetch(url)
 })
 .catch(err => {
   console.error(err);
-  document.getElementById("team").innerHTML = "Chyba načítání dat 😢";
+  document.getElementById("team").innerHTML = "Chyba načítání dat";
 });
 </script>
 
