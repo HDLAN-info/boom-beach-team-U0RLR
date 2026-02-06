@@ -34,19 +34,19 @@ jobs:
 
             await page.setViewport({
               width: 2116,
-              height: 4554
+              height: 4600
             });
 
             await page.goto(
               'https://hdlan-info.github.io/boom-beach-team-8C0299VL/',
-              { waitUntil: 'networkidle0' }
+              { waitUntil: 'networkidle2' }
             );
 
-            // počkej až JS nastaví flag
-            await page.waitForFunction(
-              () => document.body.dataset.ready === "true",
-              { timeout: 20000 }
-            );
+            // počkej až se vykreslí obsah
+            await page.waitForSelector('#team');
+
+            // extra delay pro QR + fonty
+            await new Promise(r => setTimeout(r, 2000));
 
             await page.screenshot({
               path: 'leaderboard.png',
