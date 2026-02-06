@@ -132,6 +132,28 @@ html, body {
 .intel {
   transform: translateY(-5px);
 }
+
+  .role {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  opacity: 0; /* defaultně skryté */
+}
+
+.session-icon.active {
+  background-image: url("img/session.png");
+  opacity: 1;
+}
+  
 </style>
 </head>
 
@@ -186,6 +208,10 @@ function roleColor(role) {
 function isHoliday(value) {
   return value === "TRUE";
 }
+
+function hasSession(value) {
+  return value === "TRUE";
+}
   
 fetch(url)
 .then(r => r.text())
@@ -207,7 +233,8 @@ fetch(url)
       medals: parseInt(clean(cols[idx("vp")])) || 0,
       tickets: clean(cols[idx("intels")]),
       qr: clean(cols[idx("qr")]),
-      holiday: clean(cols[idx("holiday")])
+      holiday: clean(cols[idx("holiday")]),
+      session: clean(cols[idx("session")])
     };
 
   }).filter(p => p.name !== "");
@@ -229,7 +256,10 @@ fetch(url)
       <div class="level ${isHoliday(p.holiday) ? "holiday" : ""}">${p.level}</div>
       <div>
         <div class="name" style="color:${nameColor}">${p.name}</div>
-        <div class="role">${p.role}</div>
+        <div class="role">
+  <span class="session-icon ${hasSession(p.session) ? "active" : ""}"></span>
+  <span class="role-text">${p.role}</span>
+</div>
       </div>
       ${hasQR ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
       <div class="stats">
