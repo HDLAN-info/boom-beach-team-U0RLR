@@ -190,7 +190,7 @@ function roleClass(role) {
 }
 
 fetch(url)
-.then(r => r.json())
+.then(r => r.text())
 .then(data => {
 
   const rows = data.feed.entry;
