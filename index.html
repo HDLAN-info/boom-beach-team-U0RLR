@@ -23,7 +23,6 @@ html, body {
 
 #team {
   width: 2100px;
-  margin: 0;
   padding: 16px;
   box-sizing: border-box;
   display: grid;
@@ -60,17 +59,10 @@ html, body {
 .name {
   font-size: 60px;
   font-weight: 600;
+  color: #ffffff;
   line-height: 1;
   margin-top: -7px;
-  color: white;
 }
-
-/* barvy podle role */
-.name.leader { color: gold; }
-.name.coleader { color: #2ecc71; }
-.name.officer { color: #3498db; }
-.name.member { color: white; }
-.name.other { color: red; }
 
 .role {
   font-size: 40px;
@@ -122,15 +114,6 @@ function parseCSVRow(row) {
   return result;
 }
 
-function roleClass(role) {
-  const r = role.toLowerCase();
-  if (r === "leader") return "leader";
-  if (r === "co-leader") return "coleader";
-  if (r === "officer") return "officer";
-  if (r === "member") return "member";
-  return "other";
-}
-
 fetch(url)
 .then(r => r.text())
 .then(text => {
@@ -140,7 +123,7 @@ fetch(url)
   const idx = name => header.indexOf(name.toLowerCase());
 
   const players = rows
-    .slice(1)           // vše kromě hlavičky
+    .slice(1)
     .map(row => {
       const cols = parseCSVRow(row);
       return {
@@ -152,8 +135,8 @@ fetch(url)
         qr: clean(cols[idx("qr")])
       };
     })
-    .filter(p => p.name !== "") // odstraní prázdné
-    .slice(0, 50);              // vezme prvních 50 hráčů
+    .filter(p => p.name !== "")
+    .slice(0, 50); // ← jediná změna
 
   const container = document.getElementById("team");
   container.innerHTML = "";
@@ -168,7 +151,7 @@ fetch(url)
     div.innerHTML = `
       <div class="level">${p.level}</div>
       <div>
-        <div class="name ${roleClass(p.role)}">${p.name}</div>
+        <div class="name">${p.name}</div>
         <div class="role">${p.role}</div>
       </div>
       ${hasQR ? `<div class="qr" data-link="${p.qr}"></div>` : `<div class="qr-empty"></div>`}
@@ -178,10 +161,6 @@ fetch(url)
     container.appendChild(div);
   });
 
-})
-.catch(err => {
-  console.error(err);
-  document.getElementById("team").innerHTML = "Chyba načítání dat";
 });
 </script>
 
