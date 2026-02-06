@@ -17,8 +17,16 @@ html, body {
   margin: 0;
   padding: 0;
   width: 2100px;
-  background: #eee3b7;  /* ← nová barva pozadí */
   font-family: "Trebuchet MS", Arial, sans-serif;
+
+  background-color: #eee3b7;
+
+  background-image:
+    radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+    radial-gradient(rgba(255,255,255,0.25) 1px, transparent 1px);
+
+  background-size: 6px 6px, 8px 8px;
+  background-position: 0 0, 3px 3px;
 }
 
 #team {
