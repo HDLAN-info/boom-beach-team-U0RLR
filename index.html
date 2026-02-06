@@ -206,11 +206,11 @@ function roleColor(role) {
 }
 
 function isHoliday(value) {
-  return value === "TRUE";
+  return String(value).trim().toUpperCase() === "TRUE";
 }
 
 function hasSession(value) {
-  return value === "TRUE";
+  return String(value).trim().toUpperCase() === "TRUE";
 }
   
 fetch(url)
