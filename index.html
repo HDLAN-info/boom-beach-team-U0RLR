@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=2100, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Boom Beach Team</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -153,6 +153,13 @@ html, body {
 .session-icon.active {
   background-image: url("img/session.webp");
   opacity: 1;
+}
+
+@media (max-width: 2100px) {
+  body {
+    transform: scale(calc(100vw / 2100));
+    transform-origin: top left;
+  }
 }
   
 </style>
