@@ -33,7 +33,7 @@ jobs:
             const page = await browser.newPage();
 
             await page.goto(
-              'https://hdlan-info.github.io/boom-beach-team-8C0299VL/',
+              'https://hdlan-info.github.io/boom-beach-team-U0RLR/',
               { waitUntil: 'networkidle2' }
             );
 
