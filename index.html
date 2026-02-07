@@ -263,8 +263,6 @@ fetch(url)
   <a class="qr"
    href="${p.qr}"
    data-link="${p.qr}"
-   target="_blank"
-   rel="noopener">
   <div class="qr-badge">ID</div>
 </a>
 ` : `<div class="qr-empty"></div>`}
@@ -276,18 +274,26 @@ fetch(url)
     team.appendChild(el);
   });
 
-  setTimeout(() => {
-    document.querySelectorAll(".qr").forEach(el => {
-      new QRCode(el, {
-        text: el.dataset.link,
-        width: 146,
-        height: 146,
-        colorDark: "#000",
-        colorLight: "#e0d5b3",
-        correctLevel: QRCode.CorrectLevel.H
-      });
+setTimeout(() => {
+  document.querySelectorAll(".qr").forEach(el => {
+    new QRCode(el, {
+      text: el.dataset.link,
+      width: 146,
+      height: 146,
+      colorDark: "#000",
+      colorLight: "#e0d5b3",
+      correctLevel: QRCode.CorrectLevel.H
     });
-  }, 50);
+  });
+
+  document.querySelectorAll(".qr").forEach(el => {
+    el.addEventListener("click", e => {
+      e.preventDefault();
+      window.location.href = el.href;
+    });
+  });
+
+}, 50);
 });
 </script>
 
