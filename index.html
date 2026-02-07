@@ -263,9 +263,13 @@ fetch(url)
 </div>
       </div>
       ${hasQR ? `
-  <a class="qr" href="${p.qr}" target="_blank" rel="noopener">
-    <div class="qr-badge">ID</div>
-  </a>
+<a class="qr"
+   href="${p.qr}"
+   data-link="${p.qr}"
+   target="_blank"
+   rel="noopener">
+  <div class="qr-badge">ID</div>
+</a>
 ` : `<div class="qr-empty"></div>`}
       <div class="stats">
         <div><img class="icon" src="${medalIcon}">${p.medals}</div>
