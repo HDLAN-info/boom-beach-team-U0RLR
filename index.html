@@ -16,13 +16,12 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 2100px;
+  width: 100%;
   font-family: "Trebuchet MS", Arial, sans-serif;
   background: url("img/noise.png") repeat, #f5edd1;
 }
 
 #team {
-  width: 2100px;
   margin: 0;
   padding: 16px;
   box-sizing: border-box;
@@ -30,7 +29,10 @@ html, body {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-
+  
+#page {
+  width: 2100px;
+}
 .member {
   background: url("img/noise.png") repeat, #e0d5b3;
   border-radius: 16px;
@@ -155,18 +157,12 @@ html, body {
   opacity: 1;
 }
 
-@media (max-width: 2100px) {
-  body {
-    transform: scale(calc(100vw / 2100));
-    transform-origin: top left;
-  }
-}
-  
+ 
 </style>
 </head>
 
 <body>
-
+ <div id="page">
 <div id="team">Načítám…</div>
 
 <script>
@@ -316,6 +312,6 @@ function generateQR() {
   }, 300);
 }
 </script>
-
+</div>
 </body>
 </html>
