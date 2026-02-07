@@ -124,37 +124,31 @@ html, body {
   opacity: 1;
 }
 
-  .qr-badge {
+.qr, .qr-empty {
+  width: 150px;
+  height: 150px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qr canvas {
+  width: 146px !important;
+  height: 146px !important;
+  image-rendering: pixelated;
+}
+
+.qr-badge {
   position: absolute;
-  bottom: 6px;
-  left: 6px;
   background: #000;
-  color: #00f;
+  color: #fff;
   font-weight: 900;
   font-size: 18px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 10px;
   pointer-events: none;
-  z-index: 2;
 }
-  
-.qr canvas {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 146px !important;
-  height: 146px !important;
-  image-rendering: pixelated;
-  z-index: 1;
-}
-
-.qr canvas {
-  width: 146px !important;
-  height: 146px !important;
-  image-rendering: pixelated;
-  z-index: 1;
-}
-
 
 .stats {
   font-size: 40px;
@@ -180,7 +174,6 @@ html, body {
   cursor: pointer;
   text-decoration: none;
 }
-  
 </style>
 </head>
 
@@ -255,7 +248,8 @@ fetch(url)
   players.forEach(p => {
     const el = document.createElement("div");
     el.className = "member";
-      const hasQR = p.qr !== "";
+    const hasQR = p.qr !== "";
+
     el.innerHTML = `
       <div class="level ${isTrue(p.holiday) ? "holiday" : ""}">${p.level}</div>
       <div>
@@ -265,13 +259,11 @@ fetch(url)
           ${p.role}
         </div>
       </div>
-     ${hasQR ? `
-  <a class="qr"
-   href="${p.qr}"
-   data-link="${p.qr}"
-  <div class="qr-badge">ID</div>
-</a>
-` : `<div class="qr-empty"></div>`}
+      ${hasQR ? `
+        <a class="qr" href="${p.qr}" data-link="${p.qr}">
+          <div class="qr-badge">ID</div>
+        </a>
+      ` : `<div class="qr-empty"></div>`}
       <div class="stats">
         <div><img class="icon" src="${medalIcon}">${p.medals}</div>
         <div><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
@@ -280,26 +272,18 @@ fetch(url)
     team.appendChild(el);
   });
 
-setTimeout(() => {
-  document.querySelectorAll(".qr").forEach(el => {
-    new QRCode(el, {
-      text: el.dataset.link,
-      width: 146,
-      height: 146,
-      colorDark: "#000",
-      colorLight: "#e0d5b3",
-      correctLevel: QRCode.CorrectLevel.H
+  setTimeout(() => {
+    document.querySelectorAll(".qr").forEach(el => {
+      new QRCode(el, {
+        text: el.dataset.link,
+        width: 146,
+        height: 146,
+        colorDark: "#000",
+        colorLight: "#e0d5b3",
+        correctLevel: QRCode.CorrectLevel.H
+      });
     });
-  });
-
-  document.querySelectorAll(".qr").forEach(el => {
-    el.addEventListener("click", e => {
-      e.preventDefault();
-      window.location.href = el.href;
-    });
-  });
-
-}, 50);
+  }, 50);
 });
 </script>
 
