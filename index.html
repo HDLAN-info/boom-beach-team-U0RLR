@@ -249,6 +249,7 @@ fetch(url)
   players.forEach(p => {
     const el = document.createElement("div");
     el.className = "member";
+      const hasQR = p.qr !== "";
     el.innerHTML = `
       <div class="level ${isTrue(p.holiday) ? "holiday" : ""}">${p.level}</div>
       <div>
