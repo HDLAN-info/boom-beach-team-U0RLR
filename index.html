@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=2100, initial-scale=1">
 <title>Boom Beach Team</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -16,25 +16,13 @@
 html, body {
   margin: 0;
   padding: 0;
-  width: 100%;
+  width: 2100px;
   font-family: "Trebuchet MS", Arial, sans-serif;
   background: url("img/noise.png") repeat, #f5edd1;
 }
 
-/* === KLÍČOVÝ WRAPPER PRO iOS === */
-#viewport {
-  width: 100vw;
-  overflow-x: hidden;
-}
-
-/* === PEVNÝ LAYOUT (SCALE SE APLIKUJE SEM) === */
-#page {
-  width: 2100px;
-  transform-origin: top left;
-}
-
-/* === OBSAH === */
 #team {
+  width: 2100px;
   padding: 16px;
   box-sizing: border-box;
   display: grid;
@@ -66,27 +54,14 @@ html, body {
   align-items: center;
   font-family: "Broshk", sans-serif;
   font-size: 70px;
-  font-weight: 700;
   color: #fff;
   border: 4px solid #2b5f8f;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000,
-     0 4px 0 rgba(0,0,0,0.6);
-  box-shadow:
-    inset 0 6px 0 #a7d5f5,
-    0 3px 0 rgba(0,0,0,0.10);
   margin-left: 14px;
 }
 
 .level.holiday {
   background: url("img/noise.png") repeat, #7fdc8c;
   border-color: #2f7a46;
-  box-shadow:
-    inset 0 6px 0 #bdf0c7,
-    0 3px 0 rgba(0,0,0,0.10);
 }
 
 .name {
@@ -94,12 +69,7 @@ html, body {
   font-weight: 600;
   line-height: 1;
   margin-top: -7px;
-  text-shadow:
-    -2px -2px 0 #000,
-     2px -2px 0 #000,
-    -2px  2px 0 #000,
-     2px  2px 0 #000,
-     0 5px 0 rgba(0,0,0,0.6);
+  text-shadow: 0 5px 0 rgba(0,0,0,0.6);
 }
 
 .role {
@@ -107,7 +77,6 @@ html, body {
   font-weight: 600;
   color: #2a2a2a;
   margin-top: 6px;
-  text-shadow: 0 2px 0 rgba(0,0,0,0.10);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -161,40 +130,18 @@ html, body {
   vertical-align: middle;
   margin-right: 10px;
 }
-
-.intel {
-  transform: translateY(-5px);
-}
 </style>
 </head>
 
 <body>
 
-<div id="viewport">
-  <div id="page">
-    <div id="team">Načítám…</div>
-  </div>
-</div>
-
-<script>
-/* === AUTO FIT TO WIDTH (iPad fix) === */
-function fitToWidth() {
-  const page = document.getElementById("page");
-  const scale = window.innerWidth / 2100;
-
-  if (scale < 1) {
-    page.style.transform = `scale(${scale})`;
-  } else {
-    page.style.transform = "none";
-  }
-}
-
-window.addEventListener("load", fitToWidth);
-window.addEventListener("resize", fitToWidth);
-</script>
+<div id="team">Načítám…</div>
 
 <script>
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
+
+const medalIcon = "img/medal.webp";
+const intelIcon = "img/intel.webp";
 
 function clean(v) {
   return (v || "").trim().replace(/^"+|"+$/g, "");
@@ -212,6 +159,15 @@ function parseCSVRow(row) {
   return r;
 }
 
+function roleColor(role) {
+  const r = role.toLowerCase();
+  if (r === "leader") return "#ffcb20";
+  if (r === "co-leader") return "#d9fbb2";
+  if (r === "officer") return "#bbd7d8";
+  if (r === "member") return "#ffffff";
+  return "#ff5e5e";
+}
+
 fetch(url).then(r => r.text()).then(text => {
   const rows = text.trim().split("\n");
   const header = parseCSVRow(rows[0]).map(h => h.toLowerCase());
@@ -223,28 +179,34 @@ fetch(url).then(r => r.text()).then(text => {
   rows.slice(1).forEach(row => {
     const c = parseCSVRow(row);
     const qr = clean(c[idx("qr")]);
+    const holiday = clean(c[idx("holiday")]) === "TRUE";
+    const session = clean(c[idx("session")]) === "TRUE";
 
     const el = document.createElement("div");
     el.className = "member";
     el.innerHTML = `
-      <div class="level">${clean(c[idx("level")])}</div>
+      <div class="level ${holiday ? "holiday" : ""}">${clean(c[idx("level")])}</div>
       <div>
-        <div class="name">${clean(c[idx("name")])}</div>
-        <div class="role">${clean(c[idx("role")])}</div>
+        <div class="name" style="color:${roleColor(clean(c[idx("role")]))}">
+          ${clean(c[idx("name")])}
+        </div>
+        <div class="role">
+          <span class="session-icon ${session ? "active" : ""}"></span>
+          ${clean(c[idx("role")])}
+        </div>
       </div>
       ${qr ? `<a class="qr" href="${qr}" data-link="${qr}" target="_blank"><div class="qr-badge">ID</div></a>` : `<div class="qr-empty"></div>`}
-      <div class="stats"></div>
+      <div class="stats">
+        <div><img class="icon" src="${medalIcon}">${clean(c[idx("vp")])}</div>
+        <div><img class="icon" src="${intelIcon}">${clean(c[idx("intels")])}</div>
+      </div>
     `;
     team.appendChild(el);
   });
 
   setTimeout(() => {
     document.querySelectorAll(".qr").forEach(el => {
-      new QRCode(el, {
-        text: el.dataset.link,
-        width: 146,
-        height: 146
-      });
+      new QRCode(el, { text: el.dataset.link, width: 146, height: 146 });
     });
   }, 100);
 });
