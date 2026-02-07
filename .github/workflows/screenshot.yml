@@ -43,7 +43,7 @@ jobs:
             await page.emulateMediaType('screen');
 
             await page.setViewport({
-              width: 2164,
+              width: 2192,
               height: 4600
             });
 
