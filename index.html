@@ -245,6 +245,7 @@ fetch(url)
     };
   }).filter(p => p.name !== "");
 
+  players.sort((a, b) => Number(b.medals) - Number(a.medals));
   const team = document.getElementById("team");
   team.innerHTML = "";
 
