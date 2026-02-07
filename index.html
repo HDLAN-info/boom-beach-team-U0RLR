@@ -21,18 +21,27 @@ html, body {
   background: url("img/noise.png") repeat, #f5edd1;
 }
 
+/* === KLÍČOVÝ WRAPPER PRO iOS === */
+#viewport {
+  width: 100vw;
+  overflow-x: hidden;
+}
+
+/* === PEVNÝ LAYOUT (SCALE SE APLIKUJE SEM) === */
+#page {
+  width: 2100px;
+  transform-origin: top left;
+}
+
+/* === OBSAH === */
 #team {
-  margin: 0;
   padding: 16px;
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
-  
-#page {
-  width: 2100px;
-}
+
 .member {
   background: url("img/noise.png") repeat, #e0d5b3;
   border-radius: 16px;
@@ -42,7 +51,9 @@ html, body {
   align-items: center;
   gap: 20px;
   height: 162px;
-  box-shadow: inset 0 2px 0 #fff5d8, inset 0 -2px 0 rgba(0,0,0,0.10);
+  box-shadow:
+    inset 0 2px 0 #fff5d8,
+    inset 0 -2px 0 rgba(0,0,0,0.10);
 }
 
 .level {
@@ -58,11 +69,18 @@ html, body {
   font-weight: 700;
   color: #fff;
   border: 4px solid #2b5f8f;
-  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 4px 0 rgba(0,0,0,0.6);
-  box-shadow: inset 0 6px 0 #a7d5f5, 0 3px 0 rgba(0,0,0,0.10);
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0 4px 0 rgba(0,0,0,0.6);
+  box-shadow:
+    inset 0 6px 0 #a7d5f5,
+    0 3px 0 rgba(0,0,0,0.10);
   margin-left: 14px;
 }
-  
+
 .level.holiday {
   background: url("img/noise.png") repeat, #7fdc8c;
   border-color: #2f7a46;
@@ -70,12 +88,18 @@ html, body {
     inset 0 6px 0 #bdf0c7,
     0 3px 0 rgba(0,0,0,0.10);
 }
+
 .name {
   font-size: 60px;
   font-weight: 600;
   line-height: 1;
   margin-top: -7px;
-  text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 5px 0 rgba(0,0,0,0.6);
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0 5px 0 rgba(0,0,0,0.6);
 }
 
 .role {
@@ -84,6 +108,22 @@ html, body {
   color: #2a2a2a;
   margin-top: 6px;
   text-shadow: 0 2px 0 rgba(0,0,0,0.10);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.session-icon {
+  width: 32px;
+  height: 32px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+}
+
+.session-icon.active {
+  background-image: url("img/session.webp");
+  opacity: 1;
 }
 
 .qr, .qr-empty {
@@ -98,14 +138,10 @@ html, body {
 .qr canvas {
   width: 146px !important;
   height: 146px !important;
-  image-rendering: pixelated;
 }
 
 .qr-badge {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background: #000;
   color: #fff;
   font-weight: 900;
@@ -118,11 +154,6 @@ html, body {
 .stats {
   font-size: 40px;
   font-weight: 600;
-  color: #111;
-}
-
-.stats div {
-  margin: 8px 0;
 }
 
 .icon {
@@ -134,184 +165,90 @@ html, body {
 .intel {
   transform: translateY(-5px);
 }
-
-  .role {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.session-icon {
-  display: inline-block; 
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-position: center;
-  opacity: 0; /* defaultně skryté */
-}
-
-.session-icon.active {
-  background-image: url("img/session.webp");
-  opacity: 1;
-}
-
- 
 </style>
 </head>
 
 <body>
- <div id="page">
-<div id="team">Načítám…</div>
+
+<div id="viewport">
+  <div id="page">
+    <div id="team">Načítám…</div>
+  </div>
+</div>
+
+<script>
+/* === AUTO FIT TO WIDTH (iPad fix) === */
+function fitToWidth() {
+  const page = document.getElementById("page");
+  const scale = window.innerWidth / 2100;
+
+  if (scale < 1) {
+    page.style.transform = `scale(${scale})`;
+  } else {
+    page.style.transform = "none";
+  }
+}
+
+window.addEventListener("load", fitToWidth);
+window.addEventListener("resize", fitToWidth);
+</script>
 
 <script>
 const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQqE6PF33q7CNxxCxsS26B7gHSQui6Sw2sJtuFt_cJsWfqADrxVqnTTsRS9XVSNqWyZnJqVS6GhuwOk/pub?output=csv";
-
-const medalIcon = "img/medal.webp";
-const intelIcon = "img/intel.webp";
 
 function clean(v) {
   return (v || "").trim().replace(/^"+|"+$/g, "");
 }
 
 function parseCSVRow(row) {
-  const result = [];
-  let current = "";
-  let inQuotes = false;
-
-  for (let i = 0; i < row.length; i++) {
-    const char = row[i];
-
-    if (char === '"') {
-      inQuotes = !inQuotes;
-    } else if (char === "," && !inQuotes) {
-      result.push(current);
-      current = "";
-    } else {
-      current += char;
-    }
+  const r = [];
+  let c = "", q = false;
+  for (let ch of row) {
+    if (ch === '"') q = !q;
+    else if (ch === "," && !q) { r.push(c); c = ""; }
+    else c += ch;
   }
-
-  result.push(current);
-  return result;
+  r.push(c);
+  return r;
 }
 
-/* ✅ FUNKCE PRO BARVU ROLE */
-function roleColor(role) {
-  const r = role.toLowerCase();
-
-  if (r === "leader") return "#ffcb20";
-  if (r === "co-leader") return "#d9fbb2";
-  if (r === "officer") return "#bbd7d8";
-  if (r === "member") return "#ffffff";
-
-  return "#ff5e5e";
-}
-
-function isHoliday(value) {
-  return String(value).trim().toUpperCase() === "TRUE";
-}
-
-function hasSession(value) {
-  return String(value).trim().toUpperCase() === "TRUE";
-}
-  
-fetch(url)
-.then(r => r.text())
-.then(text => {
-
+fetch(url).then(r => r.text()).then(text => {
   const rows = text.trim().split("\n");
+  const header = parseCSVRow(rows[0]).map(h => h.toLowerCase());
+  const idx = n => header.indexOf(n);
 
-  const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
-  const idx = name => header.indexOf(name.toLowerCase());
+  const team = document.getElementById("team");
+  team.innerHTML = "";
 
-  const players = rows.slice(1, 51).map(row => {
+  rows.slice(1).forEach(row => {
+    const c = parseCSVRow(row);
+    const qr = clean(c[idx("qr")]);
 
-    const cols = parseCSVRow(row);
-
-    return {
-      name: clean(cols[idx("name")]),
-      level: clean(cols[idx("level")]),
-      role: clean(cols[idx("role")]),
-      medals: parseInt(clean(cols[idx("vp")])) || 0,
-      tickets: clean(cols[idx("intels")]),
-      qr: clean(cols[idx("qr")]),
-      holiday: clean(cols[idx("holiday")]),
-      session: clean(cols[idx("session")])
-    };
-
-  }).filter(p => p.name !== "");
-
-  players.sort((a, b) => b.medals - a.medals);
-
-  const container = document.getElementById("team");
-  container.innerHTML = "";
-
-  players.forEach(p => {
-
-    const nameColor = roleColor(p.role);
-    const hasQR = p.qr !== "";
-
-    const div = document.createElement("div");
-    div.className = "member";
-
-    div.innerHTML = `
-      <div class="level ${isHoliday(p.holiday) ? "holiday" : ""}">${p.level}</div>
+    const el = document.createElement("div");
+    el.className = "member";
+    el.innerHTML = `
+      <div class="level">${clean(c[idx("level")])}</div>
       <div>
-        <div class="name" style="color:${nameColor}">${p.name}</div>
-        <div class="role">
-  <span class="session-icon ${hasSession(p.session) ? "active" : ""}"></span>
-  <span class="role-text">${p.role}</span>
-</div>
+        <div class="name">${clean(c[idx("name")])}</div>
+        <div class="role">${clean(c[idx("role")])}</div>
       </div>
-      ${hasQR ? `
-<a class="qr"
-   href="${p.qr}"
-   data-link="${p.qr}"
-   target="_blank"
-   rel="noopener">
-  <div class="qr-badge">ID</div>
-</a>
-` : `<div class="qr-empty"></div>`}
-      <div class="stats">
-        <div><img class="icon" src="${medalIcon}">${p.medals}</div>
-        <div><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
-      </div>
+      ${qr ? `<a class="qr" href="${qr}" data-link="${qr}" target="_blank"><div class="qr-badge">ID</div></a>` : `<div class="qr-empty"></div>`}
+      <div class="stats"></div>
     `;
-
-    container.appendChild(div);
+    team.appendChild(el);
   });
 
-  setTimeout(generateQR, 50);
-
-})
-.catch(err => {
-  console.error("FETCH FAILED:", err);
-  document.getElementById("team").innerHTML = "Chyba načítání dat";
-});
-
-function generateQR() {
-  try {
+  setTimeout(() => {
     document.querySelectorAll(".qr").forEach(el => {
       new QRCode(el, {
         text: el.dataset.link,
         width: 146,
-        height: 146,
-        colorDark: "#000",
-        colorLight: "#e0d5b3",
-        correctLevel: QRCode.CorrectLevel.H
+        height: 146
       });
     });
-  } catch (e) {
-    console.error("QR FAIL:", e);
-  }
-
-  setTimeout(() => {
-    document.body.setAttribute("data-ready", "true");
-  }, 300);
-}
+  }, 100);
+});
 </script>
-</div>
+
 </body>
 </html>
