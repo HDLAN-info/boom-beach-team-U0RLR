@@ -169,6 +169,12 @@ html, body {
 .intel {
   transform: translateY(-5px);
 }
+
+.qr {
+  cursor: pointer;
+  text-decoration: none;
+}
+  
 </style>
 </head>
 
@@ -252,7 +258,15 @@ fetch(url)
           ${p.role}
         </div>
       </div>
-      ${p.qr ? `<div class="qr" data-link="${p.qr}"><div class="qr-badge">ID</div></div>` : `<div class="qr-empty"></div>`}
+     ${hasQR ? `
+  <a class="qr"
+   href="${p.qr}"
+   data-link="${p.qr}"
+   target="_blank"
+   rel="noopener">
+  <div class="qr-badge">ID</div>
+</a>
+` : `<div class="qr-empty"></div>`}
       <div class="stats">
         <div><img class="icon" src="${medalIcon}">${p.medals}</div>
         <div><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
