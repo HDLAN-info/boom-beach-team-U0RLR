@@ -25,7 +25,6 @@ html, body {
 
 #team {
   width: 2100px;
-  margin: 0;
   padding: 16px;
   box-sizing: border-box;
   display: grid;
@@ -112,7 +111,6 @@ html, body {
 }
 
 .session-icon {
-  display: inline-block;
   width: 32px;
   height: 32px;
   background-repeat: no-repeat;
@@ -143,9 +141,6 @@ html, body {
 
 .qr-badge {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background: #000;
   color: #fff;
   font-weight: 900;
@@ -272,6 +267,8 @@ fetch(url)
         text: el.dataset.link,
         width: 146,
         height: 146,
+        colorDark: "#000",
+        colorLight: "#e0d5b3",
         correctLevel: QRCode.CorrectLevel.H
       });
     });
