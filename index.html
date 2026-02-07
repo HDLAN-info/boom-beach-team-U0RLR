@@ -91,6 +91,8 @@ html, body {
   color: #ffffff;
   line-height: 1;
   margin-top: -7px;
+  white-space: nowrap;
+  overflow: hidden;
   text-shadow:
     -2px -2px 0 #000,
      2px -2px 0 #000,
@@ -285,7 +287,10 @@ fetch(url)
       });
     });
   }, 50);
+    setTimeout(autoShrinkNames, 100);
 });
+
+  
   function autoShrinkNames() {
   document.querySelectorAll(".name").forEach(el => {
     let size = 60; // původní font-size
@@ -297,9 +302,6 @@ fetch(url)
     }
   });
 }
-
-// spustí po načtení
-setTimeout(autoShrinkNames, 200);
 </script>
 
 </body>
