@@ -286,6 +286,20 @@ fetch(url)
     });
   }, 50);
 });
+  function autoShrinkNames() {
+  document.querySelectorAll(".name").forEach(el => {
+    let size = 60; // původní font-size
+    el.style.fontSize = size + "px";
+
+    while (el.scrollWidth > el.clientWidth && size > 28) {
+      size--;
+      el.style.fontSize = size + "px";
+    }
+  });
+}
+
+// spustí po načtení
+setTimeout(autoShrinkNames, 200);
 </script>
 
 </body>
