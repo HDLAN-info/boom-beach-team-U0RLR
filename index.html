@@ -140,14 +140,11 @@ html, body {
   image-rendering: pixelated;
 }
 
-.qr-badge {
+.qr-logo {
   position: absolute;
-  background: #000;
-  color: #fff;
-  font-weight: 900;
-  font-size: 18px;
-  padding: 6px 12px;
-  border-radius: 10px;
+  width: 56px;
+  height: 56px;
+  background: url("/img/boombeach-logo.png") center/contain no-repeat;
   pointer-events: none;
 }
 
@@ -313,9 +310,9 @@ fetch(url)
         </div>
       </div>
       ${hasQR ? `
-        <a class="qr" href="${p.qr}" data-link="${p.qr}">
-          <div class="qr-badge">ID</div>
-        </a>
+<a class="qr" href="${p.qr}" data-link="${p.qr}">
+  <div class="qr-badge">ID</div>
+</a>
       ` : `<div class="qr-empty"></div>`}
       <div class="stats">
         <div><img class="icon" src="${medalIcon}">${p.medals}</div>
