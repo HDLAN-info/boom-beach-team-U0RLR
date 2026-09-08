@@ -1,0 +1,36 @@
+name: Update ELITE data cache
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: elite-repository-auto-updates
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Refresh cached Google Sheets data
+        run: node scripts/update-cache.mjs
+      - name: Commit changed data
+        run: |
+          if git diff --quiet -- data/cache.json; then
+            echo "Cache is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/cache.json
+          git commit -m "Update cached ELITE team data"
+          git pull --rebase origin main
+          git push

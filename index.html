@@ -3,14 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=2100">
-<title>Boom Beach Team</title>
+<title>CZECH ELITE – týmový přehled</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 
 <style>
 @font-face {
   font-family: "Broshk";
-  src: url("fonts/broshk.ttf") format("truetype");
+  src: url("fonts/BroshK.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "DSEG7-Classic";
+  src: url("fonts/DSEG7Classic-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
 }
 
 html, body {
@@ -20,26 +29,27 @@ html, body {
   font-family: "Trebuchet MS", Arial, sans-serif;
   background:
     url("img/noise.png") repeat,
-    #f5edd1;
+    #f0e2bc;
 }
 
 #team {
   width: 2100px;
-  padding: 16px;
+  padding: 0 16px 16px;
   box-sizing: border-box;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px;
 }
 
 .member {
+  min-width: 0;
   background:
     url("img/noise.png") repeat,
     #e0d5b3;
   border-radius: 16px;
   padding: 2px 8px 2px 2px;
   display: grid;
-  grid-template-columns: 124px 1fr 150px 180px;
+  grid-template-columns: 124px minmax(0, 1fr) 150px 180px;
   align-items: center;
   gap: 20px;
   height: 162px;
@@ -58,7 +68,7 @@ html, body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Broshk", sans-serif;
+  font-family: Arial, sans-serif;
   font-size: 70px;
   font-weight: 700;
   color: #fff;
@@ -73,6 +83,16 @@ html, body {
     inset 0 6px 0 #a7d5f5,
     0 3px 0 rgba(0,0,0,0.10);
   margin-left: 14px;
+}
+
+.level.contact-leadership {
+  background:
+    url("img/noise.png") repeat,
+    #f1c84b;
+  border-color: #9b7410;
+  box-shadow:
+    inset 0 6px 0 #ffe994,
+    0 3px 0 rgba(0,0,0,0.10);
 }
 
 .level.holiday {
@@ -210,6 +230,10 @@ html, body {
     -2px  2px 0 #000,
      2px  2px 0 #000;
   white-space: nowrap;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  box-sizing: border-box;
   pointer-events: none;
   animation: popupFade 0.15s ease-out;
 }
@@ -218,17 +242,437 @@ html, body {
   from { transform: scale(0.95); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
+
+.stat-history { cursor: pointer; border-radius: 12px; transition: background-color .15s ease, transform .15s ease; user-select: none; }
+.stat-history:hover, .stat-history:focus-visible { background: rgba(255,255,255,.35); transform: scale(1.03); outline: none; }
+.history-popup { position: fixed; width: min(1066px, calc(100vw - 48px)); height: 500px; padding: 22px 26px 26px; box-sizing: border-box; background: url("img/noise.png") repeat, #f0e2bc; border: 3px solid rgba(43,95,143,.65); border-radius: 20px; box-shadow: 0 14px 45px rgba(0,0,0,.38), inset 0 2px 0 #fff5d8; z-index: 10000; display: none; }
+.history-popup.visible { display: block; }
+.history-popup.player-wide { width: min(1173px, calc(100vw - 48px)); }
+.history-popup.team-wide {
+  width: min(1640px, calc(100vw - 32px));
+  height: min(950px, calc(100vh - 32px));
+  height: min(950px, calc(100dvh - 32px));
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.history-title { margin: 0 0 12px; font-size: 30px; line-height: 1.15; color: #1c2730; }
+.history-chart-wrap { height: 405px; }
+.history-change { position: absolute; top: 22px; right: 26px; max-width: 52%; z-index: 2; color: #1c2730; font-size: 30px; font-weight: 700; line-height: 1.15; text-align: right; pointer-events: none; }
+.team-wide #historyContent,
+.team-history-charts { height: 100%; min-height: 0; }
+.team-history-charts { display: grid; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.team-history-section {
+  display: flex;
+  min-height: 0;
+  padding: 16px 22px 18px;
+  box-sizing: border-box;
+  flex-direction: column;
+  background: url("img/noise.png") repeat, #e0d5b3;
+  border: 3px solid rgba(43,95,143,.65);
+  border-radius: 20px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.32), inset 0 2px 0 #fff5d8;
+  overflow: hidden;
+}
+.team-history-section .history-title { margin-bottom: 6px; font-size: clamp(20px, 2.1vw, 30px); }
+.team-history-section .history-chart-wrap { flex: 1; min-height: 0; height: auto; }
+@media (max-width: 900px) {
+  .history-popup.team-wide { width: calc(100vw - 16px); height: calc(100vh - 16px); height: calc(100dvh - 16px); }
+  .team-history-charts { gap: 8px; }
+  .team-history-section { padding: 10px 10px 12px; border-radius: 14px; }
+  .team-history-section .history-title { margin-bottom: 2px; font-size: clamp(16px, 3.4vw, 24px); }
+}
+.history-message { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 25px; color: #333; text-align: center; }
+.operations-popup { left: 50%; top: 50%; width: min(900px, calc(100vw - 48px)); height: 480px; transform: translate(-50%, -50%); text-align: center; background: url("img/noise.png") repeat, #e0d5b3; }
+.operations-content { display: flex; height: 100%; flex-direction: column; align-items: center; justify-content: center; font-family: "Trebuchet MS", Arial, sans-serif; color: #fff; }
+.operations-title,
+.operations-start,
+.operations-next,
+.operations-countdown {
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0 5px 0 rgba(0,0,0,0.6);
+}
+.operations-title { margin: 0 45px 20px; color: #ffcb20; font-size: 96px; line-height: 1.1; }
+.operations-start { margin: 0 0 53px; font-size: 44.2px; font-weight: 600; line-height: 1.2; }
+#operationsStartTime { color: #55d63b; font-size: inherit; }
+.operations-next { margin: 0 0 20px; font-size: 32px; font-weight: 600; line-height: 1.2; }
+.operations-countdown {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  box-sizing: border-box;
+  padding: 18px 36px 18px 18px;
+  border: 4px solid #fff;
+  border-radius: 18px;
+  background: #000;
+  font-family: "DSEG7-Classic", monospace;
+  font-size: 72px;
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.operations-countdown-unit { display: inline-block; min-width: 92px; text-align: center; }
+.operations-countdown-separator { display: inline-block; width: 38px; text-align: center; }
+.statistics-popup { left: 50%; top: 50%; width: min(1100px, calc(100vw - 48px)); height: auto; min-height: 500px; transform: translate(-50%, -50%); padding: 30px 38px; background: url("img/noise.png") repeat, #e0d5b3; font-family: "Trebuchet MS", Arial, sans-serif; color: #292a2d; }
+.statistics-columns { display: grid; grid-template-columns: 1.15fr .85fr; gap: 60px; }
+.statistics-heading { margin: 0 0 18px; color: #fff; font-size: 34px; line-height: 1.1; text-shadow: -2px -2px 0 #343434, 2px -2px 0 #343434, -2px 2px 0 #343434, 2px 2px 0 #343434; }
+.statistics-list { display: grid; gap: 17px; margin: 0; }
+.statistics-item { margin: 0; }
+.statistics-label { display: block; font-size: 27px; font-weight: 900; line-height: 1.05; }
+.statistics-value { display: block; min-height: 28px; margin-top: 2px; font-size: 25px; font-weight: 500; line-height: 1.05; }
+@media (max-width: 760px) {
+  .statistics-popup { padding: 22px 24px; max-height: calc(100vh - 32px); overflow-y: auto; }
+  .statistics-columns { grid-template-columns: 1fr; gap: 28px; }
+}
+
+.team-header {
+  position: relative;
+  width: 2100px;
+  margin: 0;
+  line-height: 0;
+  overflow: hidden;
+}
+
+.team-header-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.team-info-value {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  right: calc(15.75% - 1px);
+  box-sizing: border-box;
+  padding: 0;
+  background: transparent;
+  color: #2b2b31;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 34px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  white-space: nowrap;
+  text-align: right;
+  text-shadow: 0 1px 0 rgba(255,255,255,.3);
+}
+
+
+.team-action {
+  position: absolute;
+  left: 85.9%;
+  width: 12.8%;
+  height: 14.6%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 41.6px;
+  font-weight: 600;
+  line-height: 1;
+  text-align: center;
+  text-decoration: none;
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0 5px 0 rgba(0,0,0,0.6);
+}
+
+.team-action-join { top: 24.7%; cursor: pointer; }
+.team-action-operations { top: 42.3%; cursor: pointer; }
+.team-action-awards { top: 60.0%; cursor: pointer; }
+.team-action-stats { top: 77.8%; cursor: pointer; }
+
+.team-action-join:focus-visible {
+  outline: 4px solid #fff;
+  outline-offset: -5px;
+}
+.team-info-force { top: 26.3%; width: 5.70%; height: 6.7%; }
+.team-info-intels { top: 38.0%; width: 4.25%; height: 6.7%; }
+.team-info-tag { top: 49.6%; width: 10.15%; height: 6.7%; }
+.team-info-members { top: calc(61.2% + 1px); width: 5.85%; height: 6.7%; font-size: 34px; font-weight: 900; }
+.team-info-entry { top: 72.9%; width: 3.25%; height: 6.7%; }
+.team-info-type { top: 84.3%; width: 5.45%; height: 6.7%; }
+.last-update {
+  position: relative;
+  width: 2100px;
+  box-sizing: border-box;
+  padding: 4px 20px 24px;
+  text-align: center;
+  color: #fff;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 600;
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0 5px 0 rgba(0,0,0,0.6);
+}
+.info-icon {
+  position: absolute;
+  bottom: 6px;
+  right: 20px;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.info-icon:focus-visible {
+  outline: 5px solid #fff;
+  outline-offset: 4px;
+}
+.help-tour[hidden] { display: none; }
+.help-tour-guard,
+.help-tour-spotlight,
+.help-tour-bubble { position: fixed; }
+.help-tour-guard { inset: 0; z-index: 20000; }
+.help-tour-spotlight {
+  z-index: 20001;
+  pointer-events: none;
+  border: 5px solid #65d8ff;
+  border-radius: 18px;
+  box-shadow: 0 0 0 9999px rgba(0, 12, 24, .67), 0 0 28px 8px rgba(64, 207, 255, .9);
+  transition: left .22s ease, top .22s ease, width .22s ease, height .22s ease;
+}
+.help-tour-bubble {
+  z-index: 20002;
+  width: min(680px, calc(100vw - 40px));
+  box-sizing: border-box;
+  padding: 24px 28px 22px;
+  color: #1c2730;
+  background: url("img/noise.png") repeat, #f0e2bc;
+  border: 4px solid rgba(43,95,143,.9);
+  border-radius: 20px;
+  box-shadow: 0 16px 45px rgba(0,0,0,.55), inset 0 2px 0 #fff5d8;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+}
+.help-tour-progress { margin-bottom: 6px; color: #2679a8; font-size: 22px; font-weight: 900; text-align: right; }
+.help-tour-title { margin: 0 0 12px; font-size: 34px; line-height: 1.1; }
+.help-tour-text { font-size: 27px; font-weight: 600; line-height: 1.28; }
+.help-tour-text p { margin: 0; }
+.help-tour-text a { color: #0879bd; font-weight: 900; text-decoration: underline; }
+.help-level-legend { display: flex; flex-wrap: wrap; gap: 18px 28px; margin-top: 18px; }
+.help-level-item { display: flex; align-items: center; gap: 10px; }
+.help-level-dot {
+  display: inline-flex;
+  width: 54px;
+  height: 54px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 3px solid #17618e;
+  border-radius: 50%;
+  color: #fff;
+  background: #52aee0;
+  font-size: 24px;
+  font-weight: 900;
+  text-shadow: 1px 1px 2px #000;
+}
+.help-level-dot.absent { border-color: #298a51; background: #66d891; }
+.help-level-dot.contact-leadership { border-color: #9b7410; background: #f1c84b; }
+.help-tour-actions { display: flex; justify-content: space-between; gap: 14px; margin-top: 22px; }
+.help-tour-button {
+  min-width: 150px;
+  padding: 11px 18px;
+  border: 3px solid #fff;
+  border-radius: 12px;
+  color: #fff;
+  background: #1687c4;
+  box-shadow: 0 4px 0 rgba(0,0,0,.28);
+  font: 900 24px/1 "Trebuchet MS", Arial, sans-serif;
+  cursor: pointer;
+}
+.help-tour-button:hover, .help-tour-button:focus-visible { background: #0d6faa; outline: none; }
+.help-tour-button:disabled { visibility: hidden; }
+.help-tour-button.close { background: #8b5b35; }
+.help-tour-button.close:hover, .help-tour-button.close:focus-visible { background: #6d4326; }
 </style>
   
 </head>
 
 <body>
 
+<div class="team-header" aria-label="Informace o týmu">
+  <img class="team-header-image" src="img/team-header.png?v=20260815-1" alt="CZECH ELITE task force">
+  <a class="team-action team-action-join" href="https://link.boombeach.com/?url=boombeach%3A%2F%2FViewTaskforce%3Ftag%3D%23U0RLR" aria-label="Připojit se k CZECH ELITE task force">PŘIPOJIT</a>
+  <button id="operationsButton" class="team-action team-action-operations" type="button">OPERACE</button>
+  <a class="team-action team-action-awards" href="diplomy.html">DIPLOMY</a>
+  <button id="statisticsButton" class="team-action team-action-stats" type="button">STATISTIKA</button>
+  <span class="team-info-value team-info-force" data-team-info="force_points"></span>
+  <span class="team-info-value team-info-intels" data-team-info="intels_per_day"></span>
+  <span class="team-info-value team-info-tag" data-team-info="tag">#U0RLR</span>
+  <span class="team-info-value team-info-members" data-team-info="members">50/50</span>
+  <span class="team-info-value team-info-entry" data-team-info="entry_requirement">1&#8239;200</span>
+  <span class="team-info-value team-info-type" data-team-info="type">Closed</span>
+</div>
 <div id="team">Načítám…</div>
+<div class="last-update">Poslední aktualizace: <span id="lastUpdateValue"></span><img id="helpButton" class="info-icon" src="img/info.png" alt="Otevřít nápovědu" role="button" tabindex="0"></div>
+<div id="helpTour" class="help-tour" hidden>
+  <div class="help-tour-guard"></div>
+  <div id="helpTourSpotlight" class="help-tour-spotlight"></div>
+  <section id="helpTourBubble" class="help-tour-bubble" role="dialog" aria-modal="true" aria-labelledby="helpTourTitle">
+    <div id="helpTourProgress" class="help-tour-progress"></div>
+    <h2 id="helpTourTitle" class="help-tour-title"></h2>
+    <div id="helpTourText" class="help-tour-text"></div>
+    <div class="help-tour-actions">
+      <button id="helpTourPrev" class="help-tour-button" type="button">ZPĚT</button>
+      <button id="helpTourClose" class="help-tour-button close" type="button">UKONČIT</button>
+      <button id="helpTourNext" class="help-tour-button" type="button">DALŠÍ</button>
+    </div>
+  </section>
+</div>
+<div id="historyPopup" class="history-popup" role="dialog" aria-modal="false" aria-labelledby="historyTitle">
+  <h2 id="historyTitle" class="history-title"></h2>
+  <div id="historyContent"><div class="history-chart-wrap"><canvas></canvas></div></div>
+</div>
+<div id="operationsPopup" class="history-popup operations-popup" role="dialog" aria-modal="true" aria-labelledby="operationsTitle">
+  <div class="operations-content">
+    <h2 id="operationsTitle" class="operations-title">TASK FORCE OPERACE</h2>
+    <p class="operations-start">START TASK FORCE OPERACE - <span id="operationsStartTime">--:--</span></p>
+    <p class="operations-next">DALŠÍ ZAČÍNÁ ZA</p>
+    <div id="operationsCountdown" class="operations-countdown" role="timer" aria-live="off" aria-label="Čas do další operace">
+      <span id="operationsHours" class="operations-countdown-unit">00</span><span class="operations-countdown-separator">:</span><span id="operationsMinutes" class="operations-countdown-unit">00</span><span class="operations-countdown-separator">:</span><span id="operationsSeconds" class="operations-countdown-unit">00</span>
+    </div>
+  </div>
+</div>
+<div id="statisticsPopup" class="history-popup statistics-popup" role="dialog" aria-modal="true" aria-labelledby="statisticsHistoryTitle">
+  <div class="statistics-columns">
+    <section>
+      <h2 id="statisticsHistoryTitle" class="statistics-heading">HISTORIE TASK FORCE:</h2>
+      <div class="statistics-list">
+        <p class="statistics-item"><span class="statistics-label">Celkový počet zahájených operací</span><span class="statistics-value" data-team-stat="0">—</span></p>
+        <p class="statistics-item"><span class="statistics-label">Úspěšnost operací</span><span class="statistics-value" data-team-stat="1">—</span></p>
+        <p class="statistics-item"><span class="statistics-label">Nejčastěji zahajovaná operace</span><span class="statistics-value" data-team-stat="2">—</span></p>
+        <p class="statistics-item"><span class="statistics-label">Nejvyšší dosažená pozice v žebříčku</span><span class="statistics-value" data-team-stat="3">—</span></p>
+        <p class="statistics-item"><span class="statistics-label">Nejvyšší dosažený počet Force Pointů</span><span class="statistics-value" data-team-stat="4">—</span></p>
+        <p class="statistics-item"><span class="statistics-label">Task Force vytvořena</span><span class="statistics-value" data-team-stat="5">—</span></p>
+      </div>
+    </section>
+    <section>
+      <h2 class="statistics-heading">POSLEDNÍCH 30 DNÍ:</h2>
+      <div class="statistics-list">
+        <p class="statistics-item"><span class="statistics-label">Zahájené operace</span><span class="statistics-value" data-team-stat="6">—</span></p>
+        <p class="statistics-item"><span class="statistics-label">Úspěšnost operací</span><span class="statistics-value" data-team-stat="7">—</span></p>
+        <p class="statistics-item"><span class="statistics-label">Poslední zahájená operace</span><span class="statistics-value" data-team-stat="8">—</span></p>
+      </div>
+    </section>
+  </div>
+</div>
 
 <script>
-const url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQPokFwXYt-QaKLadRbn30iy15PrLZ4X-cz86jpPeDMlrhmx6xacZ5iSHBLuiMGO7MFxA7XADv2ycuR/pub?gid=0&single=true&output=csv";
+const url = "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv";
 
+const historyUrls = {
+  intel: url + "&gid=1023185859",
+  vp: url + "&gid=861908891",
+  team_intel: "data:text/csv,datum%2Chodnota"
+};
+const teamInfoUrl = url + "&gid=980574984";
+const lastUpdateUrl = "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv&gid=980574984&range=B6";
+const operationsScheduleUrl = url + "&gid=980574984&range=B17";
+const teamStatsUrl = "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv&gid=980574984&range=B8:B16";
+const dataCachePromise = fetch("data/cache.json", { cache: "no-store" }).then(response => {
+  if (!response.ok) throw new Error(`Cache HTTP ${response.status}`);
+  return response.json();
+});
+
+const liveDataPromises = new Map();
+function loadLiveData(cacheKey, fallbackUrl) {
+  if (!liveDataPromises.has(cacheKey)) {
+    const separator = fallbackUrl.includes("?") ? "&" : "?";
+    const requestUrl = `${fallbackUrl}${separator}_=${Date.now()}`;
+    liveDataPromises.set(cacheKey, fetch(requestUrl, { cache: "no-store" }).then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.text();
+    }));
+  }
+  return liveDataPromises.get(cacheKey);
+}
+
+const alwaysLiveKeys = new Set(["teamStatsCsv"]);
+const playerUpdateKeys = new Set(["intelHistoryCsv", "vpHistoryCsv"]);
+const forceLiveData = new URLSearchParams(location.search).get("liveData") === "1";
+function normalizedData(value) { return String(value || "").trim().replace(/\r\n/g, "\n"); }
+
+function loadData(cacheKey, fallbackUrl) {
+  return dataCachePromise
+    .then(async cache => {
+      const cachedValue = cache[cacheKey];
+      if (typeof cachedValue !== "string") throw new Error(`Cache value ${cacheKey} is missing`);
+
+      if (forceLiveData) return loadLiveData(cacheKey, fallbackUrl);
+
+      if (alwaysLiveKeys.has(cacheKey)) {
+        return loadLiveData(cacheKey, fallbackUrl).catch(error => {
+          console.warn(`Live check failed for ${cacheKey}; using cache`, error);
+          return cachedValue;
+        });
+      }
+
+      if (playerUpdateKeys.has(cacheKey)) {
+        const liveUpdate = await loadLiveData("lastUpdateCsv", lastUpdateUrl).catch(() => null);
+        if (liveUpdate !== null && normalizedData(liveUpdate) !== normalizedData(cache.lastUpdateCsv)) {
+          console.info(`Newer player data detected for ${cacheKey}; using Google Sheets`);
+          return loadLiveData(cacheKey, fallbackUrl);
+        }
+      }
+
+      return cachedValue;
+    })
+    .catch(error => {
+      console.warn(`Cache load failed for ${cacheKey}; using Google Sheets`, error);
+      return loadLiveData(cacheKey, fallbackUrl);
+    });
+}
+async function refreshIfInitialDataChanged() {
+  if (forceLiveData) {
+    const cleanUrl = new URL(location.href);
+    cleanUrl.searchParams.delete("liveData");
+    history.replaceState(null, "", cleanUrl);
+    return;
+  }
+  try {
+    const [cache, livePlayers, liveTeamInfo, liveLastUpdate] = await Promise.all([
+      dataCachePromise,
+      loadLiveData("playersCsv", url),
+      loadLiveData("teamInfoCsv", teamInfoUrl),
+      loadLiveData("lastUpdateCsv", lastUpdateUrl)
+    ]);
+    const changed = normalizedData(cache.playersCsv) !== normalizedData(livePlayers)
+      || normalizedData(cache.teamInfoCsv) !== normalizedData(liveTeamInfo)
+      || normalizedData(cache.lastUpdateCsv) !== normalizedData(liveLastUpdate);
+    if (changed) {
+      const refreshUrl = new URL(location.href);
+      refreshUrl.searchParams.set("liveData", "1");
+      location.replace(refreshUrl);
+    }
+  } catch (error) {
+    console.warn("Background live data check failed; keeping cached data", error);
+  }
+}
+refreshIfInitialDataChanged();
 
 const medalIcon = "img/medal.webp";
 const intelIcon = "img/intel.webp";
@@ -244,7 +688,10 @@ function parseCSVRow(row) {
 
   for (let i = 0; i < row.length; i++) {
     const char = row[i];
-    if (char === '"') inQuotes = !inQuotes;
+    if (char === '"' && inQuotes && row[i + 1] === '"') {
+      current += '"';
+      i++;
+    } else if (char === '"') inQuotes = !inQuotes;
     else if (char === "," && !inQuotes) {
       result.push(current);
       current = "";
@@ -254,6 +701,75 @@ function parseCSVRow(row) {
   return result;
 }
 
+function normalizePlayerName(value) {
+  const name = String(value || "").trim();
+  if (/^´´petrs´´$/i.test(name)) return '"Petrs"';
+  return name;
+}
+
+function normalizePlayerAccounts(value) {
+  return String(value || "").trim().split(", ")
+    .map(normalizePlayerName)
+    .filter(Boolean)
+    .join(", ");
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+
+function normalizeTeamInfoKey(value) {
+  return clean(value).toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function formatTeamNumber(value) {
+  const number = Number(String(value).replace(/\s/g, ""));
+  return Number.isFinite(number) ? new Intl.NumberFormat("cs-CZ").format(number).replace(/\s/g, "\u202F") : value;
+}
+
+loadData("teamInfoCsv", teamInfoUrl)
+  .then(text => {
+    const values = new Map(
+      text.trim().split(/\r?\n/).map(row => {
+        const columns = parseCSVRow(row);
+        return [normalizeTeamInfoKey(columns[0]), clean(columns[1])];
+      })
+    );
+
+    const mappings = {
+      force_points: ["forcepoints", true],
+      intels_per_day: ["intelsperday", true],
+      tag: ["tag", false],
+      members: ["members", false],
+      entry_requirement: ["entryregurement", true],
+      type: ["type", false]
+    };
+
+    Object.entries(mappings).forEach(([target, [source, numeric]]) => {
+      const value = values.get(source);
+      const element = document.querySelector(`[data-team-info="${target}"]`);
+      if (element && value !== undefined && value !== "") {
+        const displayValue = target === "members" ? `${value.split("/")[0]}/50` : value;
+        element.textContent = numeric ? formatTeamNumber(displayValue) : displayValue;
+      }
+    });
+  })
+  .catch(error => console.error("Team info load failed", error));
+const lastUpdatePromise = loadData("lastUpdateCsv", lastUpdateUrl)
+  .then(text => {
+    const value = clean(parseCSVRow(text.trim())[0]);
+    if (value) document.getElementById("lastUpdateValue").textContent = value.replace(/(\d{1,2}:\d{2}):\d{2}\b/, "$1");
+    return parseCzechDateTime(value);
+  })
+  .catch(error => {
+    console.error("Last update load failed", error);
+    return null;
+  });
 function roleColor(role) {
   const r = role.toLowerCase();
   if (r === "leader") return "#ffcb20";
@@ -267,8 +783,7 @@ function isTrue(v) {
   return String(v).trim().toUpperCase() === "TRUE";
 }
 
-fetch(url)
-.then(r => r.text())
+loadData("playersCsv", url)
 .then(text => {
   const rows = text.trim().split("\n");
   const header = parseCSVRow(rows[0]).map(h => clean(h).toLowerCase());
@@ -277,15 +792,17 @@ fetch(url)
   const players = rows.slice(1, 51).map(row => {
     const c = parseCSVRow(row);
     return {
-      name: clean(c[idx("name")]),
+      name: normalizePlayerName(c[idx("name")]),
+      tag: clean(c[idx("tag")]),
       level: clean(c[idx("level")]),
       role: clean(c[idx("role")]),
       medals: clean(c[idx("vp")]),
       tickets: clean(c[idx("intels")]),
       qr: clean(c[idx("qr")]),
       holiday: clean(c[idx("holiday")]),
+      contactLeadership: clean(c[idx("kontaktovat vedení")]),
       session: clean(c[idx("session")]),
-      accounts: clean(c[idx("accounts")])
+      accounts: normalizePlayerAccounts(c[idx("accounts")])
     };
   }).filter(p => p.name !== "");
 
@@ -299,11 +816,11 @@ fetch(url)
     const hasQR = p.qr !== "";
 
     el.innerHTML = `
-      <div class="level ${isTrue(p.holiday) ? "holiday" : ""}">${p.level}</div>
+      <div class="level ${isTrue(p.contactLeadership) ? "contact-leadership" : isTrue(p.holiday) ? "holiday" : ""}">${p.level}</div>
       <div>
         <div class="name account-name"
-     data-main="${p.name}"
-     data-accounts="${p.accounts}" style="color:${roleColor(p.role)}">${p.name}</div>
+     data-main="${escapeHtml(p.name)}"
+     data-accounts="${escapeHtml(p.accounts)}" style="color:${roleColor(p.role)}">${escapeHtml(p.name)}</div>
         <div class="role">
           <span class="session-icon ${isTrue(p.session) ? "active" : ""}"></span>
           ${p.role}
@@ -315,8 +832,8 @@ fetch(url)
 </a>
       ` : `<div class="qr-empty"></div>`}
       <div class="stats">
-        <div><img class="icon" src="${medalIcon}">${p.medals}</div>
-        <div><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
+        <div class="stat-history" tabindex="0" role="button" data-kind="vp" data-tag="${p.tag}" data-player="${escapeHtml(p.name)}"><img class="icon" src="${medalIcon}">${p.medals}</div>
+        <div class="stat-history" tabindex="0" role="button" data-kind="intel" data-tag="${p.tag}" data-player="${escapeHtml(p.name)}" data-weekly-intels="${p.tickets}"><img class="icon intel" src="${intelIcon}">${p.tickets}</div>
       </div>
     `;
     team.appendChild(el);
@@ -353,10 +870,11 @@ function autoShrinkNames() {
 
 // 👇 popup kód je MIMO funkci
 
-let popup = null;
+let popup = null, popupCloseTimer = null, popupPinnedForHelp = false;
 
 function showAccounts(el) {
-  hidePopup();
+  clearTimeout(popupCloseTimer);
+  hidePopup(true);
 
   const main = el.dataset.main;
   const extra = el.dataset.accounts.trim();
@@ -367,20 +885,39 @@ function showAccounts(el) {
 
   popup = document.createElement("div");
   popup.className = "account-popup";
-  popup.innerHTML = list.join("<br>");
+  popup.innerHTML = list.map(escapeHtml).join("<br>");
 
+  popup.addEventListener("mouseenter", () => clearTimeout(popupCloseTimer));
+  popup.addEventListener("mouseleave", schedulePopupClose);
   document.body.appendChild(popup);
 
   const rect = el.getBoundingClientRect();
-  popup.style.left = rect.left + "px";
-  popup.style.top = rect.bottom + 10 + "px";
+  const popupRect = popup.getBoundingClientRect();
+  const margin = 12;
+  const gap = 10;
+  const left = Math.max(margin, Math.min(rect.left, window.innerWidth - popupRect.width - margin));
+
+  let top = rect.bottom + gap;
+  if (top + popupRect.height > window.innerHeight - margin) {
+    top = rect.top - popupRect.height - gap;
+  }
+  top = Math.max(margin, Math.min(top, window.innerHeight - popupRect.height - margin));
+
+  popup.style.left = left + "px";
+  popup.style.top = top + "px";
 }
 
-function hidePopup() {
+function hidePopup(force = false) {
+  if (popupPinnedForHelp && !force) return;
+  clearTimeout(popupCloseTimer);
   if (popup) {
     popup.remove();
     popup = null;
   }
+}
+function schedulePopupClose() {
+  clearTimeout(popupCloseTimer);
+  popupCloseTimer = setTimeout(hidePopup, 250);
 }
 
 document.addEventListener("click", e => {
@@ -388,10 +925,728 @@ document.addEventListener("click", e => {
   if (el) showAccounts(el);
   else hidePopup();
 });
+document.addEventListener("mouseover", e => {
+  const el = e.target.closest(".account-name");
+  if (el && !el.contains(e.relatedTarget) && matchMedia("(hover: hover)").matches) showAccounts(el);
+});
+document.addEventListener("mouseout", e => {
+  const el = e.target.closest(".account-name");
+  if (el && !el.contains(e.relatedTarget)) schedulePopupClose();
+});
 
-window.addEventListener("scroll", hidePopup);
-window.addEventListener("touchmove", hidePopup);
+window.addEventListener("scroll", () => hidePopup());
+window.addEventListener("touchmove", () => hidePopup());
 
+
+const historyPopup = document.getElementById("historyPopup");
+const historyTitle = document.getElementById("historyTitle");
+const historyContent = document.getElementById("historyContent");
+const historyCache = {};
+let historyChart = null, historyCloseTimer = null, historyScrollCloseTimer = null, historyPinned = false;
+let historyAnchor = null, historyAutoScrolling = false, historyRequestId = 0;
+const weekendBackgroundPlugin = {
+  id: "weekendBackground",
+  beforeDraw(chart, args, options) {
+    const { ctx, chartArea, scales } = chart;
+    if (!chartArea || !scales.x || !options.days) return;
+
+    ctx.save();
+    if (options.greenRange && scales.y) {
+      const top = Math.max(chartArea.top, scales.y.getPixelForValue(options.greenRange.max));
+      const bottom = Math.min(chartArea.bottom, scales.y.getPixelForValue(options.greenRange.min));
+      ctx.fillStyle = "rgba(112, 190, 112, 0.18)";
+      ctx.fillRect(chartArea.left, top, chartArea.right - chartArea.left, bottom - top);
+    }
+    options.days.forEach((day, i) => {
+      if (day !== 0 && day !== 6) return;
+      const right = Math.min(chartArea.right, scales.x.getPixelForValue(i));
+      const left = i > 0
+        ? Math.max(chartArea.left, scales.x.getPixelForValue(i - 1))
+        : chartArea.left;
+      ctx.fillStyle = day === 6 ? "rgba(255, 214, 64, 0.18)" : "rgba(235, 80, 80, 0.14)";
+      ctx.fillRect(left, chartArea.top, right - left, chartArea.bottom - chartArea.top);
+    });
+    ctx.restore();
+  }
+};
+function parseCzechDateTime(value) {
+  const match = clean(value).match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+  if (!match) return null;
+  const date = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]), Number(match[4]), Number(match[5]), Number(match[6] || 0));
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseHistory(text, lastUpdateDate) {
+  const rows = text.trim().split(/\r?\n/).map(parseCSVRow);
+  const labels = rows[0].slice(2).map(clean), byTag = new Map();
+  rows.slice(1).forEach(c => {
+    const recentValues = c.slice(2).map(raw => ({ raw: clean(raw), value: Number(clean(raw)) })).filter(p => p.raw !== "" && Number.isFinite(p.value)).slice(-30);
+    const chartClock = lastUpdateDate ? new Date(lastUpdateDate) : new Date();
+    if (!lastUpdateDate) chartClock.setMinutes(chartClock.getMinutes() - 105);
+    chartClock.setHours(12, 0, 0, 0);
+    const points = recentValues.map((point, i) => {
+      const daysAgo = recentValues.length - i;
+      const date = new Date(chartClock);
+      date.setDate(date.getDate() - daysAgo);
+      return {
+        ...point,
+        label: daysAgo === 1 ? "Včera" : `${daysAgo} d.`,
+        dayOfWeek: date.getDay()
+      };
+    });
+    byTag.set(clean(c[1]).toUpperCase(), points);
+  });
+  return byTag;
+}
+
+function parseCzechDate(value) {
+  const match = clean(value).match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (!match) return null;
+  const date = new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]), 12, 0, 0, 0);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function parseTeamIntelHistory(text) {
+  const chartClock = new Date();
+  chartClock.setHours(12, 0, 0, 0);
+  const rows = text.trim().split(/\r?\n/).slice(1).map(parseCSVRow);
+  const parseColumn = columnIndex => rows.map(columns => {
+    const date = parseCzechDate(columns[1]);
+    const raw = clean(columns[columnIndex]);
+    const value = Number(raw);
+    if (!date || raw === "" || !Number.isFinite(value)) return null;
+    const daysAgo = Math.round((chartClock - date) / 86400000);
+    return {
+      raw,
+      value,
+      label: daysAgo === 1 ? "Včera" : `${daysAgo} d.`,
+      dayOfWeek: date.getDay()
+    };
+  }).filter(Boolean).slice(-30);
+  const sabotageIntel = parseColumn(4);
+  sabotageIntel.forEach((point, index) => {
+    const daysAgo = sabotageIntel.length - index;
+    point.label = daysAgo === 1 ? "Včera" : `${daysAgo} d.`;
+  });
+  return {
+    teamIntel: parseColumn(7),
+    sabotageIntel
+  };
+}
+function parseWeeklyTeamIntelTotal(text) {
+  const rows = text.trim().split(/\r?\n/).slice(1).map(parseCSVRow).filter(columns => {
+    const raw = clean(columns[8]).replace(/\s/g, "");
+    return raw !== "" && Number.isFinite(Number(raw));
+  });
+  let lastMondayIndex = -1;
+  rows.forEach((columns, index) => {
+    if (clean(columns[5]).toLocaleLowerCase("cs-CZ") === "pondělí") lastMondayIndex = index;
+  });
+  if (lastMondayIndex < 0) return 0;
+  return rows.slice(lastMondayIndex).reduce((sum, columns) => sum + Number(clean(columns[8]).replace(/\s/g, "")), 0);
+}
+
+const weeklyTeamIntelTotalPromise = Promise.resolve(0);
+
+async function loadHistory(kind) {
+  if (!historyCache[kind]) {
+    const cacheKeys = { intel: "intelHistoryCsv", vp: "vpHistoryCsv", team_intel: "teamIntelHistoryCsv" };
+    const historyTextPromise = loadData(cacheKeys[kind], historyUrls[kind]);
+    historyCache[kind] = (kind === "team_intel"
+      ? historyTextPromise.then(parseTeamIntelHistory)
+      : Promise.all([historyTextPromise, lastUpdatePromise]).then(([text, lastUpdateDate]) => parseHistory(text, lastUpdateDate))
+    ).catch(error => { delete historyCache[kind]; throw error; });
+  }
+  return historyCache[kind];
+}
+
+function positionHistoryPopup(anchor, ensureVisible = true) {
+  const rect = anchor.getBoundingClientRect(), width = historyPopup.getBoundingClientRect().width, height = historyPopup.getBoundingClientRect().height;
+  if (anchor.dataset.kind === "vp" || anchor.dataset.kind === "intel") {
+    const player = anchor.closest(".member") || anchor;
+    let playerRect = player.getBoundingClientRect();
+    const gap = 18;
+    const popupTop = playerRect.top - height - gap;
+    if (ensureVisible && popupTop < 24) {
+      historyAutoScrolling = true;
+      window.scrollBy(0, popupTop - 24);
+      playerRect = player.getBoundingClientRect();
+      requestAnimationFrame(() => requestAnimationFrame(() => { historyAutoScrolling = false; }));
+    }
+    const centeredLeft = playerRect.left + playerRect.width / 2 - width / 2;
+    historyPopup.style.left = `${Math.max(24, Math.min(centeredLeft, window.innerWidth - width - 24))}px`;
+    const top = playerRect.top - height - gap;
+    historyPopup.style.top = `${ensureVisible ? Math.max(24, top) : top}px`;
+    return;
+  }
+  let left = rect.right + 18;
+  if (left + width > window.innerWidth - 24) left = rect.left - width - 18;
+  historyPopup.style.left = `${Math.max(24, Math.min(left, window.innerWidth - width - 24))}px`;
+  historyPopup.style.top = `${Math.max(24, Math.min(rect.top - 160, window.innerHeight - height - 24))}px`;
+}
+
+async function showHistory(anchor, pin = false) {
+  const requestId = ++historyRequestId;
+  clearTimeout(historyCloseTimer); clearTimeout(historyScrollCloseTimer); historyPinned = pin; historyAnchor = anchor;
+  const kind = anchor.dataset.kind;
+  historyPopup.querySelector(".history-change")?.remove();
+  historyPopup.classList.toggle("team-wide", kind === "team_intel");
+  historyPopup.classList.toggle("player-wide", kind === "vp" || kind === "intel");
+  historyPopup.classList.add("visible"); positionHistoryPopup(anchor);
+  historyTitle.hidden = kind === "team_intel";
+  historyTitle.textContent = kind === "team_intel" ? "" : `${anchor.dataset.player} – ${kind === "vp" ? "VP" : "intely"} za posledních 30 dnů`;
+  historyContent.innerHTML = '<div class="history-chart-wrap"><div class="history-message">Načítám historii…</div></div>';
+  const wrap = historyContent.querySelector(".history-chart-wrap");
+  try {
+    const history = await loadHistory(kind);
+    if (requestId !== historyRequestId) return;
+    if (kind === "team_intel") {
+      const charts = [
+        {
+          title: "CZECH ELITE - Stav intelů při ukončení TaskForce OP za posledních 30 dnů.",
+          points: history.teamIntel,
+          color: "#1687c4",
+          fill: "rgba(22,135,196,.18)",
+          greenRange: { min: 1800, max: 2200 },
+          redAt2300: true
+        },
+        {
+          title: "CZECH ELITE - Intely použité na sabotáže za posledních 30 dnů.",
+          points: history.sabotageIntel,
+          color: "#d3483e",
+          fill: "rgba(211,72,62,.20)",
+          greenRange: null,
+          redAt2300: false,
+          maxValue: 1400,
+          cappedPointColor: "#7b3fc6",
+          centerPointsInDay: true
+        }
+      ];
+      if (charts.some(chart => !chart.points.length)) {
+        wrap.innerHTML = '<div class="history-message">Pro tým zatím není historie k dispozici.</div>';
+        return;
+      }
+      historyContent.innerHTML = `<div class="team-history-charts">${charts.map((chart, index) => `<section class="team-history-section"><h2 class="history-title">${chart.title}</h2><div class="history-chart-wrap"><canvas data-chart-index="${index}"></canvas></div></section>`).join("")}</div>`;
+      if (historyChart) {
+        const chartList = Array.isArray(historyChart) ? historyChart : [historyChart];
+        chartList.forEach(chart => chart.destroy());
+      }
+      historyChart = charts.map((chartConfig, index) => {
+        const plottedPoints = chartConfig.points;
+        return new Chart(historyPopup.querySelector(`canvas[data-chart-index="${index}"]`), {
+        type: "line",
+        plugins: [weekendBackgroundPlugin],
+        data: {
+          labels: chartConfig.points.map(p => p.label),
+          datasets: [{
+            data: plottedPoints.map((p, pointIndex) => {
+              const value = chartConfig.maxValue ? Math.min(p.value, chartConfig.maxValue) : p.value;
+              return chartConfig.centerPointsInDay ? { x: pointIndex - 0.5, y: value } : value;
+            }),
+            borderColor: chartConfig.color,
+            backgroundColor: chartConfig.fill,
+            fill: true,
+            clip: chartConfig.maxValue ? false : undefined,
+            tension: .25,
+            pointRadius: chartConfig.points.length < 40 ? 4 : 0,
+            pointBackgroundColor: plottedPoints.map(p => p && chartConfig.maxValue && p.value > chartConfig.maxValue
+              ? chartConfig.cappedPointColor
+              : (p && chartConfig.redAt2300 && p.value === 2300 ? "#d62828" : chartConfig.color)),
+            pointBorderColor: plottedPoints.map(p => p && chartConfig.maxValue && p.value > chartConfig.maxValue
+              ? chartConfig.cappedPointColor
+              : (p && chartConfig.redAt2300 && p.value === 2300 ? "#d62828" : chartConfig.color)),
+            pointHoverRadius: 7,
+            borderWidth: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { intersect: false, mode: "index" },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              titleFont: { size: 24 },
+              bodyFont: { size: 24 },
+              callbacks: chartConfig.maxValue ? {
+                title(items) {
+                  if (!items.length) return "";
+                  return plottedPoints[items[0].dataIndex].label;
+                },
+                label(context) {
+                  return Number(plottedPoints[context.dataIndex].value).toLocaleString("cs-CZ");
+                }
+              } : {}
+            },
+            weekendBackground: { days: chartConfig.points.map(p => p.dayOfWeek), greenRange: chartConfig.greenRange }
+          },
+          scales: {
+            x: {
+              type: chartConfig.centerPointsInDay ? "linear" : "category",
+              min: chartConfig.centerPointsInDay ? -1 : undefined,
+              max: chartConfig.centerPointsInDay ? chartConfig.points.length - 1 : undefined,
+              ticks: {
+                font: { size: 16 },
+                autoSkip: false,
+                stepSize: chartConfig.centerPointsInDay ? 1 : undefined,
+                callback(value, tickIndex, ticks) {
+                  if (chartConfig.centerPointsInDay) {
+                    const dayIndex = Number(value);
+                    if (!Number.isInteger(dayIndex) || dayIndex < 0 || dayIndex >= chartConfig.points.length) return "";
+                    return dayIndex % 3 === 0 || dayIndex === chartConfig.points.length - 1
+                      ? chartConfig.points[dayIndex].label
+                      : "";
+                  }
+                  return tickIndex % 3 === 0 || tickIndex === ticks.length - 1 ? this.getLabelForValue(value) : "";
+                }
+              }
+            },
+            y: {
+              max: chartConfig.maxValue,
+              ticks: {
+                font: { size: 16 },
+                precision: 0,
+                callback(value) {
+                  if (chartConfig.maxValue && Number(value) === chartConfig.maxValue) return `nad ${chartConfig.maxValue}`;
+                  return Number(value).toLocaleString("cs-CZ");
+                }
+              }
+            }
+          }
+        }
+        });
+      });
+      positionHistoryPopup(anchor);
+      return;
+    }
+    const points = history.get(anchor.dataset.tag.toUpperCase()) || [];
+    if (!points.length) { wrap.innerHTML = '<div class="history-message">Pro tohoto hráče zatím není historie k dispozici.</div>'; return; }
+    wrap.innerHTML = '<canvas></canvas>';
+    if (kind === "vp") {
+      const difference = points[points.length - 1].value - points[0].value;
+      const change = document.createElement("div");
+      change.className = "history-change";
+      change.textContent = difference > 0
+        ? `Růst o ${difference.toLocaleString("cs-CZ")} VP`
+        : difference < 0
+          ? `Pokles o ${Math.abs(difference).toLocaleString("cs-CZ")} VP`
+          : "Změna o 0 VP";
+      historyPopup.appendChild(change);
+    }
+    if (historyChart) {
+      const chartList = Array.isArray(historyChart) ? historyChart : [historyChart];
+      chartList.forEach(chart => chart.destroy());
+    }
+    const playerDatasets = [];
+    if (kind === "intel") {
+      const curvedRuns = [];
+      const resetSegments = [];
+      let currentRun = [];
+      points.forEach(point => {
+        const chartPoint = { x: point.label, y: point.value };
+        currentRun.push(chartPoint);
+        if (point.dayOfWeek === 6) {
+          const resetPoint = { x: point.label, y: 0 };
+          curvedRuns.push(currentRun);
+          resetSegments.push([chartPoint, resetPoint]);
+          currentRun = [resetPoint];
+        }
+      });
+      if (currentRun.length > 1 || !curvedRuns.length) curvedRuns.push(currentRun);
+      const intelDataset = (data, reset = false) => ({
+        data,
+        borderColor: "#1687c4",
+        backgroundColor: "rgba(22,135,196,.18)",
+        fill: !reset,
+        tension: reset ? 0 : .25,
+        pointRadius: points.length < 40 ? 4 : 0,
+        pointBackgroundColor: "#1687c4",
+        pointBorderColor: "#1687c4",
+        pointHoverRadius: 7,
+        borderWidth: 4
+      });
+      playerDatasets.push(...curvedRuns.map(run => intelDataset(run)), ...resetSegments.map(segment => intelDataset(segment, true)));
+    } else {
+      playerDatasets.push({
+        data: points.map(p => p.value),
+        borderColor: "#d59b00",
+        backgroundColor: "rgba(213,155,0,.18)",
+        fill: true,
+        tension: .25,
+        pointRadius: points.length < 40 ? 4 : 0,
+        pointBackgroundColor: "#d59b00",
+        pointBorderColor: "#d59b00",
+        pointHoverRadius: 7,
+        borderWidth: 4
+      });
+    }
+    historyChart = new Chart(wrap.querySelector("canvas"), {
+      type: "line",
+      plugins: [weekendBackgroundPlugin],
+      data: {
+        labels: points.map(p => p.label),
+        datasets: playerDatasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { intersect: false, mode: kind === "intel" ? "nearest" : "index" },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            titleFont: { size: 24 },
+            bodyFont: { size: 24 }
+          },
+          weekendBackground: {
+            days: points.map(p => p.dayOfWeek),
+            greenRange: kind === "team_intel" ? { min: 1800, max: 2200 } : null
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              font: { size: 16 },
+              autoSkip: false,
+              callback(value, index, ticks) {
+                return index % 3 === 0 || index === ticks.length - 1 ? this.getLabelForValue(value) : "";
+              }
+            }
+          },
+          y: { ticks: { font: { size: 16 }, precision: 0 } }
+        }
+      }
+    });
+  } catch (error) { wrap.innerHTML = '<div class="history-message">Historii se nepodařilo načíst. Zkuste to prosím znovu.</div>'; console.error(error); }
+}
+
+function closeHistory(force = false) { if (historyPinned && !force) return; historyRequestId++; historyPopup.classList.remove("visible"); historyPinned = false; historyAnchor = null; clearTimeout(historyScrollCloseTimer); }
+function scheduleHistoryClose() { clearTimeout(historyCloseTimer); historyCloseTimer = setTimeout(closeHistory, 250); }
+document.addEventListener("mouseover", e => { const stat = e.target.closest(".stat-history"); if (stat && !stat.contains(e.relatedTarget) && matchMedia("(hover: hover)").matches) showHistory(stat); });
+document.addEventListener("mouseout", e => { const stat = e.target.closest(".stat-history"); if (stat && !stat.contains(e.relatedTarget)) scheduleHistoryClose(); });
+document.addEventListener("click", e => { const stat = e.target.closest(".stat-history"); if (stat) { e.stopPropagation(); showHistory(stat, true); } else if (!e.target.closest(".history-popup")) closeHistory(true); });
+document.addEventListener("keydown", e => { const stat = e.target.closest(".stat-history"); if (stat && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); showHistory(stat, true); } if (e.key === "Escape") closeHistory(true); });
+historyPopup.addEventListener("mouseenter", () => clearTimeout(historyCloseTimer));
+historyPopup.addEventListener("mouseleave", scheduleHistoryClose);
+window.addEventListener("resize", () => closeHistory(true));
+window.addEventListener("scroll", () => {
+  if (!historyAnchor || !["vp", "intel"].includes(historyAnchor.dataset.kind) || !historyPopup.classList.contains("visible")) return;
+  if (historyAutoScrolling) return;
+  closeHistory(true);
+}, { passive: true });
+window.addEventListener("touchmove", () => {
+  if (!helpTour.hidden && historyPinned) return;
+  if (historyAnchor && ["vp", "intel"].includes(historyAnchor.dataset.kind)) closeHistory(true);
+}, { passive: true });
+
+const statisticsButton = document.getElementById("statisticsButton");
+const statisticsPopup = document.getElementById("statisticsPopup");
+const teamStatsPromise = loadData("teamStatsCsv", teamStatsUrl).then(text =>
+  text.trim().split(/\r?\n/).map(parseCSVRow).map(columns => clean(columns[0]))
+);
+
+async function openStatistics() {
+  closeHistory(true);
+  closeOperations();
+  statisticsPopup.classList.add("visible");
+  try {
+    const values = await teamStatsPromise;
+    statisticsPopup.querySelectorAll("[data-team-stat]").forEach(element => {
+      const index = Number(element.dataset.teamStat);
+      let value = values[index] || "—";
+      if ((index === 3 || index === 4) && value !== "—") value = formatTeamNumber(value);
+      if (index === 5 && value !== "—") value = `před ${formatTeamNumber(value)} dny`;
+      element.textContent = value;
+    });
+  } catch (error) {
+    console.error("Team statistics load failed", error);
+  }
+}
+function closeStatistics() { statisticsPopup.classList.remove("visible"); }
+statisticsButton.addEventListener("click", event => { event.stopPropagation(); openStatistics(); });
+document.addEventListener("click", event => {
+  if (!event.target.closest("#statisticsPopup") && !event.target.closest("#statisticsButton")) closeStatistics();
+});
+document.addEventListener("keydown", event => { if (event.key === "Escape") closeStatistics(); });
+
+const operationsButton = document.getElementById("operationsButton");
+const operationsPopup = document.getElementById("operationsPopup");
+const operationsStartTime = document.getElementById("operationsStartTime");
+const operationsHours = document.getElementById("operationsHours");
+const operationsMinutes = document.getElementById("operationsMinutes");
+const operationsSeconds = document.getElementById("operationsSeconds");
+let operationsCountdownTimer = null;
+let operationsSchedule = [];
+
+function parseOperationsSchedule(text) {
+  const match = clean(parseCSVRow(text.trim().split(/\r?\n/)[0] || "")[0]).match(/^(\d{1,2}):(\d{2})/);
+  if (!match) return [];
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Number(match[1]), Number(match[2]), 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  return [next];
+}
+
+const operationsSchedulePromise = loadData("operationsScheduleCsv", operationsScheduleUrl)
+  .then(parseOperationsSchedule)
+  .then(schedule => { operationsSchedule = schedule; return schedule; })
+  .catch(error => { console.error("Operations time load failed", error); return []; });
+
+function getNextOperationTime(now = new Date()) {
+  const configured = operationsSchedule[0];
+  if (!configured) return null;
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), configured.getHours(), configured.getMinutes(), 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  return next;
+}
+
+function updateOperationsCountdown() {
+  const target = getNextOperationTime();
+  if (!target) {
+    operationsStartTime.textContent = "--:--";
+    operationsHours.textContent = "--";
+    operationsMinutes.textContent = "--";
+    operationsSeconds.textContent = "--";
+    return;
+  }
+  operationsStartTime.textContent = `${target.getHours()}:${String(target.getMinutes()).padStart(2, "0")}`;
+  const remainingSeconds = Math.max(0, Math.ceil((target - Date.now()) / 1000));
+  const hours = Math.floor(remainingSeconds / 3600);
+  const minutes = Math.floor((remainingSeconds % 3600) / 60);
+  const seconds = remainingSeconds % 60;
+  operationsHours.textContent = String(hours).padStart(2, "0");
+  operationsMinutes.textContent = String(minutes).padStart(2, "0");
+  operationsSeconds.textContent = String(seconds).padStart(2, "0");
+}
+
+async function refreshOperationsSchedule() {
+  try {
+    const separator = operationsScheduleUrl.includes("?") ? "&" : "?";
+    const response = await fetch(`${operationsScheduleUrl}${separator}_=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Operations schedule HTTP ${response.status}`);
+    operationsSchedule = parseOperationsSchedule(await response.text());
+  } catch (error) {
+    console.warn("Live operations schedule load failed; using cached data", error);
+    await operationsSchedulePromise;
+  }
+}
+
+async function openOperations() {
+  closeHistory(true);
+  operationsPopup.classList.add("visible");
+  await refreshOperationsSchedule();
+  updateOperationsCountdown();
+  clearInterval(operationsCountdownTimer);
+  operationsCountdownTimer = setInterval(updateOperationsCountdown, 1000);
+}
+function closeOperations() {
+  operationsPopup.classList.remove("visible");
+  clearInterval(operationsCountdownTimer);
+  operationsCountdownTimer = null;
+}
+operationsButton.addEventListener("click", event => { event.stopPropagation(); openOperations(); });
+document.addEventListener("click", event => {
+  if (!event.target.closest("#operationsPopup") && !event.target.closest("#operationsButton")) closeOperations();
+});
+document.addEventListener("keydown", event => { if (event.key === "Escape") closeOperations(); });
+
+const helpButton = document.getElementById("helpButton");
+const helpTour = document.getElementById("helpTour");
+const helpTourSpotlight = document.getElementById("helpTourSpotlight");
+const helpTourBubble = document.getElementById("helpTourBubble");
+const helpTourProgress = document.getElementById("helpTourProgress");
+const helpTourTitle = document.getElementById("helpTourTitle");
+const helpTourText = document.getElementById("helpTourText");
+const helpTourPrev = document.getElementById("helpTourPrev");
+const helpTourNext = document.getElementById("helpTourNext");
+const helpTourClose = document.getElementById("helpTourClose");
+let helpTourIndex = 0;
+let helpTourTarget = null;
+let helpStartScroll = { x: 0, y: 0 };
+
+const helpTourSteps = [{
+    title: "Level hráče",
+    text: `Modrý kruh označuje aktivního hráče. Zelený kruh znamená, že hráč předem oznámil svou dočasnou neúčast. Pokud je Level hráče žlutý, je třeba, aby příslušný hráč hned, jak je to možné, kontaktoval vedení v chatu nebo na Sessionu <a href="https://boombeach.cz/session" target="_blank" rel="noopener">ZDE</a>.
+      <div class="help-level-legend">
+        <span class="help-level-item"><span class="help-level-dot">87</span> Aktivní hráč</span>
+        <span class="help-level-item"><span class="help-level-dot absent">87</span> Oznámená neúčast</span>
+        <span class="help-level-item"><span class="help-level-dot contact-leadership">87</span> Kontaktovat vedení</span>
+      </div>`,
+    selector: ".level",
+    random: true
+  },
+  {
+    title: "Jméno hráče",
+    text: "Klepnutím nebo přejetím myší nad jménem hráče zobrazíte jeho další herní účty, pokud jsou evidovány.",
+    selector: '.account-name[data-accounts]:not([data-accounts=""])',
+    prepare(anchor) {
+      popupPinnedForHelp = true;
+      showAccounts(anchor);
+      return popup || anchor;
+    }
+  },
+  {
+    title: "QR kód",
+    text: "QR kód otevře profil hráče v Boom Beach a lze jej pak přidat mezi Boom Beach přátele. Lze jej také naskenovat fotoaparátem jiného zařízení. QR kód se aktivuje také ťuknutím přímo na QR kód.",
+    selector: ".qr",
+    random: true
+  },
+  {
+    title: "Ikona Session",
+    text: "Ikona „S“ u jména hráče znamená, že je členem týmového chatu v aplikaci Session. K týmové skupině je možné se připojit také kliknutím <a href=\"https://boombeach.cz/session\" target=\"_blank\" rel=\"noopener\">ZDE</a>.",
+    selector: ".session-icon.active",
+    random: true
+  },
+  {
+    title: "VP hráče",
+    text: "Klepnutím nebo přejetím myší nad hodnotou VP zobrazíte vývoj vítězných bodů za posledních 30 dnů. Vpravo nahoře uvidíte celkový růst nebo pokles za zobrazené období. Klepnutím na bod zobrazíte v malém okénku příslušný den a přesnou hodnotu VP.",
+    selector: '[data-kind="vp"]',
+    random: true,
+    async prepare(anchor) { await showHistory(anchor, true); showRandomChartTooltips(); return historyPopup; }
+  },
+  {
+    title: "Intely hráče",
+    text: "Klepnutím nebo přejetím myší nad hodnotou intelů zobrazíte jejich vývoj za posledních 30 dnů. Údaj „Tento týden x % z celku“ vpravo nahoře vyjadřuje, jakou část všech intelů nasbíraných celým týmem od posledního nedělního resetu získal právě tento hráč. Nedělní reset v grafu znázorňuje svislý pokles na nulu. Klepnutím na bod zobrazíte v malém okénku příslušný den a přesný počet intelů.",
+    selector: '[data-kind="intel"]',
+    random: true,
+    async prepare(anchor) { await showHistory(anchor, true); showRandomChartTooltips(); return historyPopup; }
+  },
+  {
+    title: "Tlačítka v záhlaví",
+    text: "V záhlaví můžete vstoupit do týmu, zobrazit čas příští operace, prohlédnout diplomy a otevřít statistiky Task Force.",
+    selector: ".team-header"
+  }
+];
+
+function randomHelpElement(selector) {
+  const elements = [...document.querySelectorAll(selector)].filter(element => element.getClientRects().length);
+  return elements.length ? elements[Math.floor(Math.random() * elements.length)] : null;
+}
+
+    function showRandomChartTooltips() {
+      const charts = (Array.isArray(historyChart) ? historyChart : [historyChart]).filter(Boolean);
+      charts.forEach(chart => {
+        const candidates = [];
+        chart.data.datasets.forEach((dataset, datasetIndex) => {
+          dataset.data.forEach((point, index) => {
+            const value = typeof point === "number" ? point : Number(point?.y);
+            const element = chart.getDatasetMeta(datasetIndex).data[index];
+            if (Number.isFinite(value) && value > 0 && element) {
+              candidates.push({ datasetIndex, index, element });
+            }
+          });
+        });
+        if (!candidates.length) return;
+        const chartWidth = chart.chartArea.right - chart.chartArea.left;
+        const edgeCandidates = candidates.filter(({ element }) => {
+          const relativeX = (element.x - chart.chartArea.left) / chartWidth;
+          return relativeX < 0.28 || relativeX > 0.72;
+        });
+        const visibleCandidates = edgeCandidates.length ? edgeCandidates : candidates;
+        const activePoint = visibleCandidates[Math.floor(Math.random() * visibleCandidates.length)];
+        const { element } = activePoint;
+        chart.setActiveElements([activePoint]);
+        chart.tooltip?.setActiveElements([activePoint], { x: element.x, y: element.y });
+        chart.update();
+      });
+}
+
+function blockHelpTourScroll(event) {
+  if (helpTour.hidden) return;
+  event.preventDefault();
+}
+
+function clearHelpExamples() {
+  closeHistory(true);
+  closeOperations();
+  popupPinnedForHelp = false;
+  hidePopup(true);
+}
+
+function positionHelpTour(target) {
+  if (!target || helpTour.hidden) return;
+  const rect = target.getBoundingClientRect();
+  const padding = 10;
+  const left = Math.max(8, rect.left - padding);
+  const top = Math.max(8, rect.top - padding);
+  const right = Math.min(window.innerWidth - 8, rect.right + padding);
+  const bottom = Math.min(window.innerHeight - 8, rect.bottom + padding);
+  helpTourSpotlight.style.left = `${left}px`;
+  helpTourSpotlight.style.top = `${top}px`;
+  helpTourSpotlight.style.width = `${Math.max(20, right - left)}px`;
+  helpTourSpotlight.style.height = `${Math.max(20, bottom - top)}px`;
+
+  const bubbleRect = helpTourBubble.getBoundingClientRect();
+  const gap = 22;
+  let bubbleLeft = rect.right + gap;
+  let bubbleTop = rect.top;
+  if (bubbleLeft + bubbleRect.width > window.innerWidth - 20) bubbleLeft = rect.left - bubbleRect.width - gap;
+  if (bubbleLeft < 20) bubbleLeft = Math.max(20, Math.min(window.innerWidth - bubbleRect.width - 20, rect.left + rect.width / 2 - bubbleRect.width / 2));
+  if (bubbleTop + bubbleRect.height > window.innerHeight - 20) bubbleTop = rect.top - bubbleRect.height - gap;
+  if (bubbleTop < 20) bubbleTop = Math.max(20, window.innerHeight - bubbleRect.height - 20);
+  helpTourBubble.style.left = `${bubbleLeft}px`;
+  helpTourBubble.style.top = `${bubbleTop}px`;
+}
+
+async function showHelpTourStep(index) {
+  helpTourIndex = Math.max(0, Math.min(index, helpTourSteps.length - 1));
+  clearHelpExamples();
+  const step = helpTourSteps[helpTourIndex];
+  const anchor = (step.random ? randomHelpElement(step.selector) : document.querySelector(step.selector)) || document.querySelector(".team-header");
+  anchor.scrollIntoView({ block: "center", inline: "center" });
+  await new Promise(resolve => setTimeout(resolve, 180));
+  helpTourTarget = step.prepare ? await step.prepare(anchor) : anchor;
+  helpTourProgress.textContent = `${helpTourIndex + 1} / ${helpTourSteps.length}`;
+  helpTourTitle.textContent = step.title;
+  helpTourText.innerHTML = `<p>${step.text}</p>`;
+  helpTourPrev.disabled = helpTourIndex === 0;
+  const isLastHelpStep = helpTourIndex === helpTourSteps.length - 1;
+  helpTourNext.hidden = false;
+  helpTourNext.disabled = isLastHelpStep;
+  helpTourNext.textContent = "DALŠÍ";
+  positionHelpTour(helpTourTarget);
+  (isLastHelpStep ? helpTourClose : helpTourNext).focus({ preventScroll: true });
+}
+
+async function openHelpTour() {
+  helpStartScroll = { x: window.scrollX, y: window.scrollY };
+  helpTour.hidden = false;
+  await showHelpTourStep(0);
+}
+
+function closeHelpTour() {
+  if (helpTour.hidden) return;
+  helpTour.hidden = true;
+  clearHelpExamples();
+  window.scrollTo(helpStartScroll.x, helpStartScroll.y);
+  helpButton.focus({ preventScroll: true });
+}
+
+helpButton.addEventListener("click", event => { event.stopPropagation(); openHelpTour(); });
+helpButton.addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openHelpTour(); }
+});
+helpTourBubble.addEventListener("click", event => event.stopPropagation());
+document.addEventListener("click", event => {
+  if (helpTour.hidden || event.target.closest?.(".help-tour-bubble")) return;
+  event.preventDefault();
+  event.stopImmediatePropagation();
+}, true);
+helpTourPrev.addEventListener("click", () => showHelpTourStep(helpTourIndex - 1));
+helpTourNext.addEventListener("click", () => {
+  if (helpTourIndex === helpTourSteps.length - 1) closeHelpTour();
+  else showHelpTourStep(helpTourIndex + 1);
+});
+helpTourClose.addEventListener("click", closeHelpTour);
+document.addEventListener("keydown", event => {
+  if (helpTour.hidden) return;
+  if (event.key === "Escape") { event.preventDefault(); closeHelpTour(); return; }
+  if (event.key === "ArrowRight") { event.preventDefault(); showHelpTourStep(helpTourIndex + 1); return; }
+  if (event.key === "ArrowLeft") { event.preventDefault(); showHelpTourStep(helpTourIndex - 1); return; }
+  if (!event.target.closest?.(".help-tour-bubble") && ["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) event.preventDefault();
+});
+window.addEventListener("wheel", blockHelpTourScroll, { passive: false });
+window.addEventListener("touchmove", blockHelpTourScroll, { passive: false });
+window.addEventListener("resize", () => positionHelpTour(helpTourTarget));
 </script>
 
 </body>
