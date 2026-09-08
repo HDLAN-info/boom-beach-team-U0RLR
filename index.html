@@ -1478,6 +1478,7 @@ const helpTourSteps = [{
     title: "Jméno hráče",
     text: "Klepnutím nebo přejetím myší nad jménem hráče zobrazíte jeho další herní účty, pokud jsou evidovány.",
     selector: '.account-name[data-accounts]:not([data-accounts=""])',
+    random: true,
     prepare(anchor) {
       popupPinnedForHelp = true;
       showAccounts(anchor);
