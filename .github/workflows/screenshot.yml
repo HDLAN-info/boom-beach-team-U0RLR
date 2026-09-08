@@ -5,6 +5,13 @@ on:
     - cron: "*/5 * * * *"
   workflow_dispatch:
 
+permissions:
+  contents: write
+
+concurrency:
+  group: elite-repository-auto-updates
+  cancel-in-progress: false
+
 jobs:
   screenshot:
     runs-on: ubuntu-latest
@@ -32,6 +39,11 @@ jobs:
 
             const page = await browser.newPage();
 
+            await page.setViewport({
+              width: 2100,
+              height: 1000
+            });
+
             await page.goto(
               'https://hdlan-info.github.io/boom-beach-team-U0RLR/',
               { waitUntil: 'networkidle2' }
@@ -42,20 +54,16 @@ jobs:
 
             await page.emulateMediaType('screen');
 
-            await page.setViewport({
-              width: 2192,
-              height: 4600
-            });
-
-            // vynutí background do bitmapy
-            await page.evaluate(() => {
-              document.body.style.background = "#f5edd1";
-            });
+            const pageWidth = await page.evaluate(() =>
+              Math.ceil(document.documentElement.scrollWidth)
+            );
+            await page.setViewport({ width: pageWidth, height: 1000 });
 
             await page.screenshot({
               path: 'leaderboard.jpg',
               type: 'jpeg',
-              quality: 95
+              quality: 95,
+              fullPage: true
             });
 
             await browser.close();
@@ -68,4 +76,5 @@ jobs:
           git config --global user.email "actions@github.com"
           git add leaderboard.jpg
           git commit -m "Update screenshot" || echo "No changes"
+          git pull --rebase origin main
           git push
