@@ -191,6 +191,7 @@ html, body {
 .qr {
   cursor: pointer;
   text-decoration: none;
+  transform: translateY(10px);
 }
 .account-name {
   cursor: pointer;
@@ -347,6 +348,35 @@ html, body {
   width: 100%;
   height: auto;
 }
+.team-tab-label {
+  position: absolute;
+  top: 0;
+  height: 20.5%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  color: #fff;
+  font-family: "Trebuchet MS", Arial, sans-serif;
+  font-size: 52.8px;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  text-align: center;
+  text-decoration: none;
+  transform: translateY(10px);
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0 5px 0 rgba(0,0,0,.6);
+}
+.team-tab-back { left: 10.2%; width: 27.1%; }
+.team-tab-czech { left: 37.3%; width: 27.2%; }
+.team-tab-elite { left: 64.4%; width: 27.1%; }
+.team-tab-label[href] { cursor: pointer; }
+.team-tab-label:focus-visible { outline: 4px solid #fff; outline-offset: -7px; }
 
 .team-info-value {
   position: absolute;
@@ -360,7 +390,7 @@ html, body {
   color: #2b2b31;
   font-family: "Trebuchet MS", Arial, sans-serif;
   font-size: 34px;
-  font-weight: 900;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
   line-height: 1;
   white-space: nowrap;
@@ -389,6 +419,7 @@ html, body {
   line-height: 1;
   text-align: center;
   text-decoration: none;
+  transform: translateY(10px);
   text-shadow:
     -2px -2px 0 #000,
      2px -2px 0 #000,
@@ -487,7 +518,7 @@ html, body {
   color: #fff;
   background: #52aee0;
   font-size: 24px;
-  font-weight: 900;
+  font-weight: 600;
   text-shadow: 1px 1px 2px #000;
 }
 .help-level-dot.absent { border-color: #298a51; background: #66d891; }
@@ -515,7 +546,10 @@ html, body {
 <body>
 
 <div class="team-header" aria-label="Informace o týmu">
-  <img class="team-header-image" src="img/team-header.png?v=20260815-1" alt="CZECH ELITE task force">
+  <img class="team-header-image" src="img/team-header.png?v=20260911-2" alt="CZECH ELITE task force">
+  <a class="team-tab-label team-tab-back" href="https://boombeach.cz/">Zpět na 🌐</a>
+  <a class="team-tab-label team-tab-czech" href="https://pv9ljuq2.boombeach.cz/">CZECH</a>
+  <span class="team-tab-label team-tab-elite" aria-current="page">CZECH ELITE</span>
   <a class="team-action team-action-join" href="https://link.boombeach.com/?url=boombeach%3A%2F%2FViewTaskforce%3Ftag%3D%23U0RLR" aria-label="Připojit se k CZECH ELITE task force">PŘIPOJIT</a>
   <button id="operationsButton" class="team-action team-action-operations" type="button">OPERACE</button>
   <a class="team-action team-action-awards" href="diplomy.html">DIPLOMY</a>
