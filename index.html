@@ -521,7 +521,7 @@ html, body {
   <a class="team-action team-action-awards" href="diplomy.html">DIPLOMY</a>
   <button id="statisticsButton" class="team-action team-action-stats" type="button">STATISTIKA</button>
   <span class="team-info-value team-info-force" data-team-info="force_points"></span>
-  <span class="team-info-value team-info-intels" data-team-info="intels_per_day"></span>
+  <span class="team-info-value team-info-intels" id="teamIntelLatestValue"></span>
   <span class="team-info-value team-info-tag" data-team-info="tag">#U0RLR</span>
   <span class="team-info-value team-info-members" data-team-info="members">50/50</span>
   <span class="team-info-value team-info-entry" data-team-info="entry_requirement">1&#8239;200</span>
@@ -764,7 +764,7 @@ loadData("teamIntelHistoryCsv", historyUrls.team_intel)
   .then(text => {
     const values = parseTeamIntelHistory(text).teamIntel;
     const latestValue = values.at(-1)?.value;
-    const element = document.querySelector('[data-team-info="intels_per_day"]');
+    const element = document.getElementById("teamIntelLatestValue");
     if (element && Number.isFinite(latestValue)) element.textContent = formatTeamNumber(latestValue);
   })
   .catch(error => console.error("Team intel load failed", error));
