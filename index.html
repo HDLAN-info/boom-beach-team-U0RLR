@@ -587,7 +587,7 @@ const url = "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz
 const historyUrls = {
   intel: url + "&gid=1023185859",
   vp: url + "&gid=861908891",
-  team_intel: "data:text/csv,datum%2Chodnota"
+  team_intel: url + "&gid=1371018295&range=A:M"
 };
 const teamInfoUrl = url + "&gid=980574984";
 const lastUpdateUrl = "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv&gid=980574984&range=B6";
@@ -743,7 +743,6 @@ loadData("teamInfoCsv", teamInfoUrl)
 
     const mappings = {
       force_points: ["forcepoints", true],
-      intels_per_day: ["intelsperday", true],
       tag: ["tag", false],
       members: ["members", false],
       entry_requirement: ["entryregurement", true],
@@ -760,6 +759,15 @@ loadData("teamInfoCsv", teamInfoUrl)
     });
   })
   .catch(error => console.error("Team info load failed", error));
+
+loadData("teamIntelHistoryCsv", historyUrls.team_intel)
+  .then(text => {
+    const values = parseTeamIntelHistory(text).teamIntel;
+    const latestValue = values.at(-1)?.value;
+    const element = document.querySelector('[data-team-info="intels_per_day"]');
+    if (element && Number.isFinite(latestValue)) element.textContent = formatTeamNumber(latestValue);
+  })
+  .catch(error => console.error("Team intel load failed", error));
 const lastUpdatePromise = loadData("lastUpdateCsv", lastUpdateUrl)
   .then(text => {
     const value = clean(parseCSVRow(text.trim())[0]);

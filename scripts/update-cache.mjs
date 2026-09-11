@@ -8,7 +8,9 @@ const sources = {
   teamInfoCsv: `${publishedBase}&gid=980574984`,
   lastUpdateCsv: "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv&gid=980574984&range=B6",
   intelHistoryCsv: `${publishedBase}&gid=1023185859`,
-  vpHistoryCsv: `${publishedBase}&gid=861908891`,  operationsScheduleCsv: `${publishedBase}&gid=980574984&range=B17`,
+  vpHistoryCsv: `${publishedBase}&gid=861908891`,
+  teamIntelHistoryCsv: `${publishedBase}&gid=1371018295&range=A:M`,
+  operationsScheduleCsv: `${publishedBase}&gid=980574984&range=B17`,
   teamStatsCsv: "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv&gid=980574984&range=B8:B16"
 };
 
