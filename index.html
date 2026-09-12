@@ -209,6 +209,47 @@ html, body {
 
 /* 👇 MUSÍ být pořád uvnitř style */
 
+.player-tag-trigger {
+  cursor: pointer;
+}
+
+.player-tag-popup {
+  position: fixed;
+  background:
+    url("img/noise.png") repeat,
+    #e0d5b3;
+  border-radius: 16px;
+  padding: 14px 26px 16px;
+  box-shadow:
+    inset 0 2px 0 #fff5d8,
+    inset 0 -2px 0 rgba(0,0,0,0.10),
+    0 10px 30px rgba(0,0,0,0.25);
+  z-index: 10000;
+  color: #182838;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: popupFade 0.15s ease-out;
+}
+
+.player-tag-popup .tag-label {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.player-tag-popup .tag-value {
+  margin-top: 2px;
+  font-size: 42px;
+  font-weight: 800;
+  color: #fff;
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0 4px 0 rgba(0,0,0,0.45);
+}
 .account-popup {
   position: fixed;
   background:
@@ -856,7 +897,9 @@ loadData("playersCsv", url)
     const hasQR = p.qr !== "";
 
     el.innerHTML = `
-      <div class="level ${isTrue(p.contactLeadership) ? "contact-leadership" : isTrue(p.holiday) ? "holiday" : ""}">${p.level}</div>
+      <div class="level player-tag-trigger ${isTrue(p.contactLeadership) ? "contact-leadership" : isTrue(p.holiday) ? "holiday" : ""}"
+           tabindex="0" role="button" aria-label="Zobrazit tag hráče ${escapeHtml(p.name)}"
+           data-tag="${escapeHtml(p.tag)}">${escapeHtml(p.level)}</div>
       <div>
         <div class="name account-name"
      data-main="${escapeHtml(p.name)}"
@@ -907,6 +950,66 @@ function autoShrinkNames() {
   });
 } // 👈 funkce končí TADY
 
+
+let playerTagPopup = null;
+let playerTagAnchor = null;
+
+function hidePlayerTagPopup() {
+  if (playerTagPopup) playerTagPopup.remove();
+  playerTagPopup = null;
+  playerTagAnchor = null;
+}
+
+function showPlayerTagPopup(anchor) {
+  if (!anchor.dataset.tag) return;
+  if (playerTagPopup && playerTagAnchor === anchor) {
+    hidePlayerTagPopup();
+    return;
+  }
+
+  hidePlayerTagPopup();
+  playerTagAnchor = anchor;
+  playerTagPopup = document.createElement("div");
+  playerTagPopup.className = "player-tag-popup";
+  playerTagPopup.innerHTML = `<div class="tag-label">TAG HRÁČE</div><div class="tag-value">${escapeHtml(anchor.dataset.tag)}</div>`;
+  document.body.appendChild(playerTagPopup);
+
+  const rect = anchor.getBoundingClientRect();
+  const popupRect = playerTagPopup.getBoundingClientRect();
+  const margin = 12;
+  const gap = 10;
+  const left = Math.max(margin, Math.min(
+    rect.left + (rect.width - popupRect.width) / 2,
+    window.innerWidth - popupRect.width - margin
+  ));
+  let top = rect.top - popupRect.height - gap;
+  if (top < margin) top = rect.bottom + gap;
+  playerTagPopup.style.left = `${left}px`;
+  playerTagPopup.style.top = `${Math.min(top, window.innerHeight - popupRect.height - margin)}px`;
+}
+
+document.addEventListener("click", event => {
+  const trigger = event.target.closest(".player-tag-trigger");
+  if (trigger) {
+    event.preventDefault();
+    showPlayerTagPopup(trigger);
+  } else {
+    hidePlayerTagPopup();
+  }
+});
+
+document.addEventListener("keydown", event => {
+  const trigger = event.target.closest(".player-tag-trigger");
+  if (trigger && (event.key === "Enter" || event.key === " ")) {
+    event.preventDefault();
+    showPlayerTagPopup(trigger);
+  } else if (event.key === "Escape") {
+    hidePlayerTagPopup();
+  }
+});
+
+window.addEventListener("scroll", hidePlayerTagPopup);
+window.addEventListener("resize", hidePlayerTagPopup);
 
 // 👇 popup kód je MIMO funkci
 
@@ -1505,14 +1608,29 @@ let helpStartScroll = { x: 0, y: 0 };
 
 const helpTourSteps = [{
     title: "Level hráče",
-    text: `Modrý kruh označuje aktivního hráče. Zelený kruh znamená, že hráč předem oznámil svou dočasnou neúčast. Pokud je Level hráče žlutý, je třeba, aby příslušný hráč hned, jak je to možné, kontaktoval vedení v chatu nebo na Sessionu <a href="https://boombeach.cz/session" target="_blank" rel="noopener">ZDE</a>.
+    text: `Klepnutím na kruh s levelem zobrazíte tag hráče. Modrý kruh označuje aktivního hráče. Zelený kruh znamená, že hráč předem oznámil svou dočasnou neúčast. Pokud je Level hráče žlutý, je třeba, aby příslušný hráč hned, jak je to možné, kontaktoval vedení v chatu nebo na Sessionu <a href="https://boombeach.cz/session" target="_blank" rel="noopener">ZDE</a>.
       <div class="help-level-legend">
         <span class="help-level-item"><span class="help-level-dot">87</span> Aktivní hráč</span>
         <span class="help-level-item"><span class="help-level-dot absent">87</span> Oznámená neúčast</span>
         <span class="help-level-item"><span class="help-level-dot contact-leadership">87</span> Kontaktovat vedení</span>
       </div>`,
-    selector: ".level",
-    random: true
+    selector: ".player-tag-trigger",
+    random: true,
+    prepare(anchor) {
+      showPlayerTagPopup(anchor);
+      return {
+        getBoundingClientRect() {
+          const levelRect = anchor.getBoundingClientRect();
+          const tagRect = playerTagPopup?.getBoundingClientRect();
+          if (!tagRect) return levelRect;
+          const left = Math.min(levelRect.left, tagRect.left);
+          const top = Math.min(levelRect.top, tagRect.top);
+          const right = Math.max(levelRect.right, tagRect.right);
+          const bottom = Math.max(levelRect.bottom, tagRect.bottom);
+          return { left, top, right, bottom, width: right - left, height: bottom - top };
+        }
+      };
+    }
   },
   {
     title: "Jméno hráče",
@@ -1599,8 +1717,8 @@ function blockHelpTourScroll(event) {
 function clearHelpExamples() {
   closeHistory(true);
   closeOperations();
-  popupPinnedForHelp = false;
-  hidePopup(true);
+  $1
+  hidePlayerTagPopup();
 }
 
 function positionHelpTour(target) {
