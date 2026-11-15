@@ -1121,9 +1121,9 @@ function parseCzechDateTime(value) {
 
 function parseHistory(text, lastUpdateDate) {
   const rows = text.trim().split(/\r?\n/).map(parseCSVRow);
-  const labels = rows[0].slice(2).map(clean), byTag = new Map();
+  const byTag = new Map();
   rows.slice(1).forEach(c => {
-    const recentValues = c.slice(2).map(raw => ({ raw: clean(raw), value: Number(clean(raw)) })).filter(p => p.raw !== "" && Number.isFinite(p.value)).slice(-30);
+    const recentValues = c.slice(2).map(raw => ({ raw: clean(raw), value: Number(clean(raw)) })).filter(p => p.raw !== "" && Number.isFinite(p.value)).slice(0, 30).reverse();
     const chartClock = lastUpdateDate ? new Date(lastUpdateDate) : new Date();
     if (!lastUpdateDate) chartClock.setMinutes(chartClock.getMinutes() - 105);
     chartClock.setHours(12, 0, 0, 0);

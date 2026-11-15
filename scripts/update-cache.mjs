@@ -47,8 +47,8 @@ function trimPlayerHistory(text) {
   return text.trim().split(/\r?\n/).map(parseCsvRow)
     .map((columns, rowIndex) => {
       const history = rowIndex === 0
-        ? columns.slice(2).slice(-30)
-        : columns.slice(2).filter(value => String(value).trim() !== "").slice(-30);
+        ? columns.slice(2).slice(0, 30)
+        : columns.slice(2).filter(value => String(value).trim() !== "").slice(0, 30);
       return toCsvRow([...columns.slice(0, 2), ...history]);
     })
     .join("\n");
