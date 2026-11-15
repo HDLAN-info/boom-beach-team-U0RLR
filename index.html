@@ -666,6 +666,7 @@ const teamInfoUrl = url + "&gid=980574984";
 const lastUpdateUrl = "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv&gid=980574984&range=B6";
 const operationsScheduleUrl = url + "&gid=980574984&range=B17";
 const teamStatsUrl = "https://docs.google.com/spreadsheets/d/1VVmwTf-aAXgeE26cftc6z8zVlJz8w8fC5sNqnPWbGBY/export?format=csv&gid=980574984&range=B8:B16";
+const currentPlayerHistoryValues = { intel: new Map(), vp: new Map() };
 const dataCachePromise = fetch("data/cache.json", { cache: "no-store" }).then(response => {
   if (!response.ok) throw new Error(`Cache HTTP ${response.status}`);
   return response.json();
@@ -905,6 +906,16 @@ loadData("playersCsv", url)
     };
   }).filter(p => p.name !== "");
 
+  currentPlayerHistoryValues.intel.clear();
+  currentPlayerHistoryValues.vp.clear();
+  players.forEach(player => {
+    const tag = player.tag.toUpperCase();
+    const intel = Number(player.tickets);
+    const vp = Number(player.medals);
+    if (Number.isFinite(intel)) currentPlayerHistoryValues.intel.set(tag, intel);
+    if (Number.isFinite(vp)) currentPlayerHistoryValues.vp.set(tag, vp);
+  });
+
   players.sort((a, b) => Number(b.medals) - Number(a.medals));
   const team = document.getElementById("team");
   team.innerHTML = "";
@@ -1137,11 +1148,29 @@ function parseCzechDateTime(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function parseHistory(text, lastUpdateDate) {
+function parseHistory(text, lastUpdateDate, kind) {
   const rows = text.trim().split(/\r?\n/).map(parseCSVRow);
   const byTag = new Map();
-  rows.slice(1).forEach(c => {
-    const recentValues = c.slice(2).map(raw => ({ raw: clean(raw), value: Number(clean(raw)) })).filter(p => p.raw !== "" && Number.isFinite(p.value)).slice(0, 30).reverse();
+  const parsedRows = rows.slice(1).map(columns => ({
+    columns,
+    tag: clean(columns[1]).toUpperCase(),
+    values: columns.slice(2).map(raw => ({ raw: clean(raw), value: Number(clean(raw)) }))
+      .filter(point => point.raw !== "" && Number.isFinite(point.value))
+  }));
+  let newestFirstDifference = 0;
+  let oldestFirstDifference = 0;
+  let comparedPlayers = 0;
+  parsedRows.forEach(row => {
+    const currentValue = currentPlayerHistoryValues[kind]?.get(row.tag);
+    if (!Number.isFinite(currentValue) || !row.values.length) return;
+    newestFirstDifference += Math.abs(row.values[0].value - currentValue);
+    oldestFirstDifference += Math.abs(row.values[row.values.length - 1].value - currentValue);
+    comparedPlayers++;
+  });
+  const newestFirst = comparedPlayers === 0 || newestFirstDifference <= oldestFirstDifference;
+
+  parsedRows.forEach(({ columns, tag, values }) => {
+    const recentValues = newestFirst ? values.slice(0, 30).reverse() : values.slice(-30);
     const chartClock = lastUpdateDate ? new Date(lastUpdateDate) : new Date();
     if (!lastUpdateDate) chartClock.setMinutes(chartClock.getMinutes() - 105);
     chartClock.setHours(12, 0, 0, 0);
@@ -1155,7 +1184,7 @@ function parseHistory(text, lastUpdateDate) {
         dayOfWeek: date.getDay()
       };
     });
-    byTag.set(clean(c[1]).toUpperCase(), points);
+    byTag.set(tag, points);
   });
   return byTag;
 }
@@ -1215,7 +1244,7 @@ async function loadHistory(kind) {
     const historyTextPromise = loadData(cacheKeys[kind], historyUrls[kind]);
     historyCache[kind] = (kind === "team_intel"
       ? historyTextPromise.then(parseTeamIntelHistory)
-      : Promise.all([historyTextPromise, lastUpdatePromise]).then(([text, lastUpdateDate]) => parseHistory(text, lastUpdateDate))
+      : Promise.all([historyTextPromise, lastUpdatePromise]).then(([text, lastUpdateDate]) => parseHistory(text, lastUpdateDate, kind))
     ).catch(error => { delete historyCache[kind]; throw error; });
   }
   return historyCache[kind];
