@@ -672,11 +672,18 @@ const dataCachePromise = fetch("data/cache.json", { cache: "no-store" }).then(re
 });
 
 const liveDataPromises = new Map();
+const liveDataTimeoutMs = 12000;
+function fetchLiveData(requestUrl) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), liveDataTimeoutMs);
+  return fetch(requestUrl, { cache: "no-store", signal: controller.signal })
+    .finally(() => clearTimeout(timeout));
+}
 function loadLiveData(cacheKey, fallbackUrl) {
   if (!liveDataPromises.has(cacheKey)) {
     const separator = fallbackUrl.includes("?") ? "&" : "?";
     const requestUrl = `${fallbackUrl}${separator}_=${Date.now()}`;
-    liveDataPromises.set(cacheKey, fetch(requestUrl, { cache: "no-store" }).then(response => {
+    liveDataPromises.set(cacheKey, fetchLiveData(requestUrl).then(response => {
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response.text();
     }));
@@ -695,7 +702,12 @@ function loadData(cacheKey, fallbackUrl) {
       const cachedValue = cache[cacheKey];
       if (typeof cachedValue !== "string") throw new Error(`Cache value ${cacheKey} is missing`);
 
-      if (forceLiveData) return loadLiveData(cacheKey, fallbackUrl);
+      if (forceLiveData) {
+        return loadLiveData(cacheKey, fallbackUrl).catch(error => {
+          console.warn(`Live load failed for ${cacheKey}; using cache`, error);
+          return cachedValue;
+        });
+      }
 
       if (alwaysLiveKeys.has(cacheKey)) {
         return loadLiveData(cacheKey, fallbackUrl).catch(error => {
@@ -708,7 +720,10 @@ function loadData(cacheKey, fallbackUrl) {
         const liveUpdate = await loadLiveData("lastUpdateCsv", lastUpdateUrl).catch(() => null);
         if (liveUpdate !== null && normalizedData(liveUpdate) !== normalizedData(cache.lastUpdateCsv)) {
           console.info(`Newer player data detected for ${cacheKey}; using Google Sheets`);
-          return loadLiveData(cacheKey, fallbackUrl);
+          return loadLiveData(cacheKey, fallbackUrl).catch(error => {
+            console.warn(`Updated live load failed for ${cacheKey}; using cache`, error);
+            return cachedValue;
+          });
         }
       }
 
@@ -716,7 +731,10 @@ function loadData(cacheKey, fallbackUrl) {
     })
     .catch(error => {
       console.warn(`Cache load failed for ${cacheKey}; using Google Sheets`, error);
-      return loadLiveData(cacheKey, fallbackUrl);
+      return loadLiveData(cacheKey, fallbackUrl).catch(liveError => {
+        console.warn(`Live load also failed for ${cacheKey}`, liveError);
+        throw liveError;
+      });
     });
 }
 async function refreshIfInitialDataChanged() {
